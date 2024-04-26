@@ -1,4 +1,4 @@
-package DAO;
+package POJO;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
