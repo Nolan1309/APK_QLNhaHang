@@ -1,11 +1,15 @@
 package GUI.taikhoan;
 
+import DAO.AccountDAO;
+import static DAO.SharedPreferences.saveCredentials;
 import GUI.TrangChinh;
 import java.awt.Image;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Login extends javax.swing.JFrame {
 
@@ -15,6 +19,29 @@ public class Login extends javax.swing.JFrame {
         ImageIcon icon = new ImageIcon("C:\\Users\\Admin\\Documents\\NetBeansProjects\\UIAPP\\src\\folder\\logo.png");
         Image img = icon.getImage();
         setIconImage(img);
+        Enter();
+    }
+
+    void Enter() {
+        txtPass.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    btnLogin.doClick();
+                }
+            }
+        });
+        txtUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    btnLogin.doClick();
+                }
+            }
+        });
+    }
+
+    private boolean LoginCheck(String user, String pass) {
+        AccountDAO account = new AccountDAO();
+        return account.checklogin(user, pass);
     }
 
     @SuppressWarnings("unchecked")
@@ -114,6 +141,11 @@ public class Login extends javax.swing.JFrame {
                 btnLoginActionPerformed(evt);
             }
         });
+        btnLogin.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnLoginKeyPressed(evt);
+            }
+        });
 
         jLabel4.setText("I don't have an account");
 
@@ -206,15 +238,21 @@ public class Login extends javax.swing.JFrame {
         String user = txtUsername.getText();
         String password = String.valueOf(txtPass.getPassword());
 
-        System.out.println(user);
-        System.out.println(password);
+        if (LoginCheck(user, password)) {
 
-//        TrangChinh trangchu = new TrangChinh();
-//
-//        this.setVisible(false);
-//        trangchu.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//
-//        trangchu.setVisible(true);
+            saveCredentials(user, password);
+            JOptionPane.showMessageDialog(this, "Đăng nhập thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+//            String user = getUser();
+//            String pass = getPassword();
+
+            TrangChinh trangchu = new TrangChinh();
+            this.setVisible(false);
+            trangchu.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            trangchu.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Tài khoản hoặc mật khẩu không chính xác!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+
 //        trangchu.addWindowListener(new WindowAdapter() {
 //            @Override
 //            public void windowClosed(WindowEvent e) {
@@ -223,6 +261,22 @@ public class Login extends javax.swing.JFrame {
 //        });
 
     }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void btnLoginKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnLoginKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String user = txtUsername.getText();
+            String password = String.valueOf(txtPass.getPassword());
+
+            if (LoginCheck(user, password)) {
+                TrangChinh trangchu = new TrangChinh();
+                this.setVisible(false);
+                trangchu.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                trangchu.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Tài khoản hoặc mật khẩu không chính xác!", "Thông báo", JOptionPane.YES_NO_OPTION);
+            }
+        }
+    }//GEN-LAST:event_btnLoginKeyPressed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

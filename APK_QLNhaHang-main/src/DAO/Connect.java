@@ -29,10 +29,10 @@ public class Connect {
     String strPassword = "123";
 
     public Connect() {
-        ketNoiCSDL();
+//        ketNoiCSDL();
     }
 
-    void ketNoiCSDL() {
+    Connection ketNoiCSDL() {
         try {
             try {
                 String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -46,18 +46,48 @@ public class Connect {
                     + ";user=" + strUser + ";password=" + strPassword
                     + ";encrypt=true;trustServerCertificate=true;";
             connection = DriverManager.getConnection(connectURL);
-            if (connection != null) {
-                System.out.println("Kết nối thành công");
-            } else {
-                System.out.println("Kết nối thất bại");
-            }
+
+            return connection;
+        } catch (SQLException ex) {
+            Logger.getLogger(Connect.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public void close() {
+        try {
+            connection.close();
         } catch (SQLException ex) {
             Logger.getLogger(Connect.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    public ResultSet executeQuery(String strSQL) {
+        try {
+            ResultSet rs;
+            Statement sm = connection.createStatement();
+            rs = sm.executeQuery(strSQL);
+            return rs;
+        } catch (SQLException ex) {
+            Logger.getLogger(Connect.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public int executeUpdate(String strSQL) {
+        try {
+            int result;
+            Statement sm = connection.createStatement();
+            result = sm.executeUpdate(strSQL);
+            return result;
+        } catch (SQLException ex) {
+            Logger.getLogger(Connect.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
     public static void main(String[] args) {
         Connect db = new Connect();
-       
+
     }
 }

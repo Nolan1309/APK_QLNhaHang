@@ -4,6 +4,7 @@
  */
 package GUI;
 
+import DAO.AccountDAO;
 import GUI.doanhthu.DishReport;
 import GUI.doanhthu.SalesReport;
 import GUI.doanhthu.TheIngredientsReport;
@@ -29,6 +30,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import static DAO.SharedPreferences.getPassword;
+import static DAO.SharedPreferences.getUser;
+import static DAO.SharedPreferences.clearCredentials;
+import java.util.ArrayList;
 
 /**
  *
@@ -49,7 +54,19 @@ public class TrangChinh extends javax.swing.JFrame {
         addBanAn();
         addThucUong();
         setLocationRelativeTo(null);
+
+        String user = getUser();
+        String pass = getPassword();
+        getFullName(user, pass);
         // setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+
+    void getFullName(String user, String pass) {
+        AccountDAO account = new AccountDAO();
+        ArrayList<String> fullNames = account.getName(user, pass);
+        for (String fullName : fullNames) {
+            txtNhanVien.setText(fullName);
+        }
     }
 
     private void addBanAn() {
@@ -139,10 +156,12 @@ public class TrangChinh extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
+        txtBan = new javax.swing.JLabel();
+        txtDateOrder = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        txtBill = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        txtNhanVien = new javax.swing.JLabel();
         panelLeft_Center = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
@@ -195,17 +214,23 @@ public class TrangChinh extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
         jLabel9.setText("Ngày vào: ");
 
-        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel10.setText("1");
+        txtBan.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
+        txtBan.setText("1");
 
-        jLabel11.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel11.setText("1");
+        txtDateOrder.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
+        txtDateOrder.setText("1");
 
         jLabel12.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
         jLabel12.setText("Tiền thanh bill: ");
 
-        jLabel13.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel13.setText("1");
+        txtBill.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
+        txtBill.setText("1");
+
+        jLabel1.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        jLabel1.setText("Nhân viên: ");
+
+        txtNhanVien.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        txtNhanVien.setText("Trống");
 
         javax.swing.GroupLayout panelLeft_TopLayout = new javax.swing.GroupLayout(panelLeft_Top);
         panelLeft_Top.setLayout(panelLeft_TopLayout);
@@ -215,23 +240,27 @@ public class TrangChinh extends javax.swing.JFrame {
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelLeft_TopLayout.createSequentialGroup()
-                                .addComponent(jLabel12)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel13))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelLeft_TopLayout.createSequentialGroup()
-                                .addComponent(jLabel9)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel11))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelLeft_TopLayout.createSequentialGroup()
+                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelLeft_TopLayout.createSequentialGroup()
+                                .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(22, 22, 22)
+                                .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtDateOrder, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                                    .addComponent(txtBill, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(panelLeft_TopLayout.createSequentialGroup()
                                 .addComponent(jLabel7)
                                 .addGap(80, 80, 80)
-                                .addComponent(jLabel10))))
+                                .addComponent(txtBan, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(94, 94, 94)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtNhanVien, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
                         .addGap(147, 147, 147)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(164, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         panelLeft_TopLayout.setVerticalGroup(
             panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -240,15 +269,17 @@ public class TrangChinh extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jLabel10))
+                    .addComponent(txtBan)
+                    .addComponent(jLabel1)
+                    .addComponent(txtNhanVien, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(jLabel11))
+                    .addComponent(txtDateOrder))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
-                    .addComponent(jLabel13))
+                    .addComponent(txtBill))
                 .addGap(0, 11, Short.MAX_VALUE))
         );
 
@@ -382,7 +413,7 @@ public class TrangChinh extends javax.swing.JFrame {
         panelBanAn.setLayout(panelBanAnLayout);
         panelBanAnLayout.setHorizontalGroup(
             panelBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 796, Short.MAX_VALUE)
+            .addGap(0, 661, Short.MAX_VALUE)
         );
         panelBanAnLayout.setVerticalGroup(
             panelBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -395,7 +426,7 @@ public class TrangChinh extends javax.swing.JFrame {
         panelThucDon.setLayout(panelThucDonLayout);
         panelThucDonLayout.setHorizontalGroup(
             panelThucDonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 796, Short.MAX_VALUE)
+            .addGap(0, 661, Short.MAX_VALUE)
         );
         panelThucDonLayout.setVerticalGroup(
             panelThucDonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -408,7 +439,7 @@ public class TrangChinh extends javax.swing.JFrame {
         panelThucUong.setLayout(panelThucUongLayout);
         panelThucUongLayout.setHorizontalGroup(
             panelThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 796, Short.MAX_VALUE)
+            .addGap(0, 661, Short.MAX_VALUE)
         );
         panelThucUongLayout.setVerticalGroup(
             panelThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -639,6 +670,8 @@ public class TrangChinh extends javax.swing.JFrame {
 
             // open the Login form
             Login.main(null);
+
+            clearCredentials();
         } else {
             setDefaultCloseOperation(0);
         }
@@ -652,6 +685,8 @@ public class TrangChinh extends javax.swing.JFrame {
 
             // open the Login form
             Login.main(null);
+
+            clearCredentials();
         } else {
             setDefaultCloseOperation(0);
         }
@@ -699,10 +734,8 @@ public class TrangChinh extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
@@ -741,5 +774,9 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JTabbedPane panelTab;
     private javax.swing.JPanel panelThucDon;
     private javax.swing.JPanel panelThucUong;
+    private javax.swing.JLabel txtBan;
+    private javax.swing.JLabel txtBill;
+    private javax.swing.JLabel txtDateOrder;
+    private javax.swing.JLabel txtNhanVien;
     // End of variables declaration//GEN-END:variables
 }
