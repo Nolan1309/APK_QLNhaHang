@@ -4,26 +4,19 @@
  */
 package GUI.thucdon;
 
-import static DAO.SharedPreferences.clearCredentials;
 import DAO.ThucDonDao;
-import GUI.taikhoan.Login;
 import POJO.DanhMucMonAn;
+import POJO.MonAn;
 import POJO.NguyenLieu;
 import POJO.NguyenLieu_MonAn;
-import java.awt.Component;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -36,86 +29,79 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Admin
  */
-public class ThemMon extends javax.swing.JFrame {
+public class SuaMon extends javax.swing.JFrame {
 
+    int idmonan = 11;
+    int danhmuc;
     DefaultTableModel dtm = new DefaultTableModel();
     String thumuc = "F:\\Code\\Java\\BaoCao\\Son_Qui\\APK_QLNhaHang-main\\src\\folder\\";
     String tenFileGlobal = "";
     File selectLuuFolder;
 
     /**
-     * Creates new form ThemMon
+     * Creates new form XoaMon
      */
-    public ThemMon() throws IOException {
+    public SuaMon() throws IOException {
         initComponents();
-        setLocationRelativeTo(null);
-        setTitle("Thêm món ăn");
-        setResizable(false);
-        //Tab đơn chung
         loadDanhMucMonAn();
-//        HienThiHinhAnh("BanhCanh.jpg");
-        //Tab nguyên liệu
+        loadNguyenLieu();
+        loadThongTinChung();
+        setLocationRelativeTo(null);
+
         String[] tieuDe = {"Mã nguyên liệu", "Tên nguyên liệu", "Đơn vị", "Số lượng"};
         dtm.setColumnIdentifiers(tieuDe);
         tableNguyenLieu.setModel(dtm);
         tableNguyenLieu.setRowHeight(30);
+        loadNguyenLieuTable();
+    }
 
-        loadNguyenLieu();
-
-        // Add an ItemListener to the ComboBox
-        cbNguyenlieu.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    addSelectedNguyenLieuToTable();
+    private void loadThongTinChung() throws IOException {
+        ThucDonDao thucdon = new ThucDonDao();
+        ArrayList<MonAn> listmonan = thucdon.getMonAn(idmonan);
+        if (!listmonan.isEmpty()) {
+            MonAn monan = listmonan.get(0);
+            txtTenMon.setText(monan.getTenmon());
+            danhmuc = monan.getIddanhmuc();
+            txtGia.setText(monan.getGiamon());
+            txtMoTa.setText(monan.getMota());
+            String file = monan.getHinhanh();
+            tenFileGlobal = file;
+            File selectedFile = new File(thumuc + file);
+            if (selectedFile.exists() && selectedFile.isFile()) {
+                try {
+                    BufferedImage image = ImageIO.read(selectedFile);
+                    displayImageOnPanel(image);
+                } catch (IIOException e) {
+                    JOptionPane.showMessageDialog(this, "Error reading image file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            }
-        });
-    }
-
-    private void HienThiHinhAnh(String filename) throws IOException {
-        // Đường dẫn tương đối của hình ảnh
-        String relativePath = "\\folder\\" + filename;
-        String projectPath = System.getProperty("user.dir"); // Lấy đường dẫn của thư mục dự án
-        String absolutePath = projectPath + "\\src" + relativePath; // Tạo đường dẫn tuyệt đối dựa trên thư mục src
-        File file = new File(absolutePath);
-        if (file.exists()) {
-            BufferedImage image = ImageIO.read(file.getAbsoluteFile());
-            JLabel label = new JLabel(new ImageIcon(image));
-            label.setSize(panelAnh.getWidth(), panelAnh.getHeight());
-            panelAnh.removeAll();
-            panelAnh.add(label);
-            panelAnh.revalidate();
-            panelAnh.repaint();
-
-        } else {
-            System.err.println("Không thể tìm thấy hình ảnh: " + absolutePath);
-        }
-    }
-
-    private void addSelectedNguyenLieuToTable() {
-        String selectedItem = (String) cbNguyenlieu.getSelectedItem();
-        ThucDonDao thucdon = new ThucDonDao();
-        ArrayList<NguyenLieu> listNguyenLieu = thucdon.loadMenuNguyenLieu();
-        NguyenLieu selectedNguyenLieu = null;
-        for (NguyenLieu nl : listNguyenLieu) {
-            if (nl.getTennguyenlieu().equals(selectedItem)) {
-                selectedNguyenLieu = nl;
-                break;
+            } else {
+                JOptionPane.showMessageDialog(this, "Image file not found: " + selectedFile.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-        if (selectedNguyenLieu != null) {
-            int rowIndex = tableNguyenLieu.getModel().getRowCount();
-            dtm.addRow(new Object[]{selectedNguyenLieu.getId(), selectedNguyenLieu.getTennguyenlieu(), selectedNguyenLieu.getDonvi(), "0"});
-        }
     }
 
-    private void loadNguyenLieu() {
+    private void displayImageOnPanel(BufferedImage image) {
+        JLabel label = new JLabel(new ImageIcon(image));
+        // Đặt kích thước cho JLabel tương tự như kích thước của hình ảnh
+//        label.setSize(image.getWidth(), image.getHeight());
+        label.setSize(panelAnh.getWidth(), panelAnh.getHeight());
+        // Đưa JLabel vào JPanel đã chọn
+        panelAnh.removeAll(); // Xóa bất kỳ thành phần nào đã được hiển thị trước đó trên JPanel
+        panelAnh.add(label); // Thêm JLabel chứa hình ảnh vào JPanel
+        panelAnh.revalidate(); // Cập nhật JPanel để hiển thị lại
+        panelAnh.repaint(); // Vẽ lại JPanel
+    }
+
+    private void loadNguyenLieuTable() {
         ThucDonDao thucdon = new ThucDonDao();
-        ArrayList<NguyenLieu> listNguyenLieu = thucdon.loadMenuNguyenLieu();
-        cbNguyenlieu.removeAllItems(); // Remove any existing items in the ComboBox
-        for (NguyenLieu nl : listNguyenLieu) {
-            cbNguyenlieu.addItem(nl.getTennguyenlieu());
+        ArrayList<NguyenLieu_MonAn> listmonan = thucdon.getNguyenLieu(idmonan);
+        // Create a new DefaultTableModel for the table
+        
+
+        // Add each NguyenLieu_MonAn object to the table
+        for (NguyenLieu_MonAn nguyenlieu : listmonan) {
+            Object[] row = {nguyenlieu.getIdnguyenlieu(), nguyenlieu.getTennguyenlieu(),nguyenlieu.getDonvi(),nguyenlieu.getSoluong()};
+            dtm.addRow(row);
         }
     }
 
@@ -128,104 +114,13 @@ public class ThemMon extends javax.swing.JFrame {
         }
     }
 
-    //Hàm lấy giá trị từ đơn chung
-    private void LayGiaTriChung() {
-        String selectedItem = (String) cbDanhMuc.getSelectedItem();
+    private void loadNguyenLieu() {
         ThucDonDao thucdon = new ThucDonDao();
-        ArrayList<DanhMucMonAn> listNguyenLieu = thucdon.loadMenuDanhmuc();
-        DanhMucMonAn selectedDanhMuc = null;
-        for (DanhMucMonAn nl : listNguyenLieu) {
-            if (nl.getTendanhmuc().equals(selectedItem)) {
-                selectedDanhMuc = nl;
-                break;
-            }
+        ArrayList<NguyenLieu> listNguyenLieu = thucdon.loadMenuNguyenLieu();
+        cbNguyenlieu.removeAllItems(); // Remove any existing items in the ComboBox
+        for (NguyenLieu nl : listNguyenLieu) {
+            cbNguyenlieu.addItem(nl.getTennguyenlieu());
         }
-        int iddanhmuc = 0;
-        if (selectedDanhMuc != null) {
-            iddanhmuc = selectedDanhMuc.getId();
-        }
-
-        String tenmon = txtTenMon.getText();
-        String mota = txtMoTa.getText();
-        String gia = txtGia.getText();
-        String tenfileluudb = tenFileGlobal;
-
-        try {
-            BufferedImage image = ImageIO.read(selectLuuFolder);
-            File destinationFile = new File(thumuc + tenFileGlobal);
-            ImageIO.write(image, "jpg", destinationFile);
-            JOptionPane.showMessageDialog(null, "Image added and saved successfully!");
-        } catch (IOException ex) {
-            Logger.getLogger(ThemMon.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        int idMonAn = thucdon.Insert(iddanhmuc, tenmon, gia, mota, tenFileGlobal);
-//        System.out.println("ID danh mục vừa tạo : " + iddanhmuc);
-//        System.out.println("Tên món vừa tạo : " + tenmon);
-//        System.out.println("Giá vừa tạo : " + gia);
-//        System.out.println("Mô tả vừa tạo : " + mota);
-//        System.out.println("Tên file vừa tạo : " + tenFileGlobal);
-//        System.out.println("Id vừa tạo : " + idMonAn);
-        String idmon = String.valueOf(idMonAn);
-        ArrayList<NguyenLieu_MonAn> listmon = NguyenLieu_MonAn_Default(idmon);
-        for (NguyenLieu_MonAn nguyenLieu_MonAn : listmon) {
-            thucdon.InsertNguyenLieu_MonAn(nguyenLieu_MonAn);
-        }
-    }
-
-    //Lấy dữ liệu từ Nguyên liệu để lưu
-    private ArrayList<ArrayList<Object>> getDataFromTable() {
-        DefaultTableModel model = (DefaultTableModel) tableNguyenLieu.getModel();
-        int rowCount = model.getRowCount();
-        int columnCount = model.getColumnCount();
-        Object[][] data = new Object[rowCount][columnCount];
-
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
-                data[i][j] = model.getValueAt(i, j);
-            }
-        }
-        ArrayList<ArrayList<Object>> dataList = new ArrayList<>();
-        for (Object[] row : data) {
-            ArrayList<Object> rowList = new ArrayList<>(Arrays.asList(row));
-            dataList.add(rowList);
-        }
-        return dataList;
-    }
-
-    private ArrayList<NguyenLieu_MonAn> NguyenLieu_MonAn_Default(String id_Mon) {
-        ArrayList<NguyenLieu_MonAn> list = new ArrayList<>();
-
-        ArrayList<ArrayList<Object>> dataList = getDataFromTable();
-        for (ArrayList<Object> row : dataList) {
-            Object firstElement0 = row.get(0);
-            Object firstElement1 = row.get(1); //Tên nguyên liệu
-            Object firstElement2 = row.get(2); // Đơn vị
-            Object firstElement3 = row.get(3); // Số lượng
-
-            NguyenLieu_MonAn nguyenlieu = new NguyenLieu_MonAn();
-
-            nguyenlieu.setIdmon(Integer.parseInt(id_Mon.toString()));
-            nguyenlieu.setIdnguyenlieu(Integer.parseInt(firstElement0.toString()));
-            nguyenlieu.setTennguyenlieu(firstElement1.toString());
-            nguyenlieu.setDonvi(firstElement2.toString());
-            nguyenlieu.setSoluong(Float.parseFloat(firstElement3.toString()));
-            list.add(nguyenlieu);
-        }
-        return list;
-    }
-
-    // Phương thức để hiển thị ảnh trên JPanel
-    private void displayImageOnPanel(BufferedImage image) {
-        JLabel label = new JLabel(new ImageIcon(image));
-        // Đặt kích thước cho JLabel tương tự như kích thước của hình ảnh
-//        label.setSize(image.getWidth(), image.getHeight());
-        label.setSize(panelAnh.getWidth(), panelAnh.getHeight());
-        // Đưa JLabel vào JPanel đã chọn
-        panelAnh.removeAll(); // Xóa bất kỳ thành phần nào đã được hiển thị trước đó trên JPanel
-        panelAnh.add(label); // Thêm JLabel chứa hình ảnh vào JPanel
-        panelAnh.revalidate(); // Cập nhật JPanel để hiển thị lại
-        panelAnh.repaint(); // Vẽ lại JPanel
     }
 
     /**
@@ -264,11 +159,7 @@ public class ThemMon extends javax.swing.JFrame {
         btnHuy = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent evt) {
-                formWindowClosing(evt);
-            }
-        });
+        setPreferredSize(new java.awt.Dimension(1100, 800));
 
         jLabel1.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel1.setText("Loại");
@@ -400,7 +291,7 @@ public class ThemMon extends javax.swing.JFrame {
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addGap(134, 134, 134)
                         .addComponent(jLabel5)
-                        .addGap(0, 169, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGap(171, 171, 171)
@@ -472,7 +363,7 @@ public class ThemMon extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1100, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 935, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -482,7 +373,7 @@ public class ThemMon extends javax.swing.JFrame {
                 .addComponent(cbNguyenlieu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Định lượng nguyên vật liệu", jPanel4);
@@ -505,7 +396,7 @@ public class ThemMon extends javax.swing.JFrame {
         );
 
         btnThemMonAn.setFont(new java.awt.Font("Times New Roman", 1, 18)); // NOI18N
-        btnThemMonAn.setText("Thêm");
+        btnThemMonAn.setText("Cập nhật");
         btnThemMonAn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnThemMonAnActionPerformed(evt);
@@ -548,73 +439,74 @@ public class ThemMon extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnThemMonAn)
                     .addComponent(btnHuy))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnAddAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddAnhActionPerformed
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
+//        int returnValue = fileChooser.showOpenDialog(null);
+//        if (returnValue == JFileChooser.APPROVE_OPTION) {
+//            File selectedFile = fileChooser.getSelectedFile();
+//            //            duongdananh = selectedFile.getAbsoluteFile();
+//            tenFileGlobal = selectedFile.getName();
+//            selectLuuFolder = selectedFile;
+//            try {
+//                BufferedImage image = ImageIO.read(selectedFile);
+//                // Hiển thị ảnh trên JPanel
+//                displayImageOnPanel(image);
+//
+//            } catch (IOException ex) {
+//                JOptionPane.showMessageDialog(null, "Error adding image: " + ex.getMessage());
+//            }
+//        }
+    }//GEN-LAST:event_btnAddAnhActionPerformed
+
+    private void btnRemoveAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveAnhActionPerformed
+//        Component[] components = panelAnh.getComponents(); // Lấy tất cả các thành phần con của panelAnh
+//        for (Component component : components) {
+//            if (component instanceof JLabel) { // Kiểm tra xem thành phần có phải là JLabel chứa hình ảnh không
+//                panelAnh.remove(component); // Nếu là JLabel, xóa nó khỏi panelAnh
+//                break; // Sau khi tìm và xóa thành phần đầu tiên, thoát khỏi vòng lặp
+//            }
+//        }
+//        panelAnh.revalidate(); // Cập nhật panelAnh để hiển thị lại
+//        panelAnh.repaint(); // Vẽ lại panelAnh
+    }//GEN-LAST:event_btnRemoveAnhActionPerformed
+
     private void btnThemMonAnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemMonAnActionPerformed
+      
         String tenmon = txtTenMon.getText();
         String mota = txtMoTa.getText();
         String gia = txtGia.getText();
         String tenfileluudb = tenFileGlobal;
-
+        
+        System.out.println(tenmon);
+        System.out.println(mota);
+        System.out.println(gia);
+        System.out.println(tenfileluudb);
+        System.out.println(danhmuc);
         // Check if any of the fields are empty or null
-        if (tenmon.isEmpty() || mota.isEmpty() || gia.isEmpty() || tenfileluudb.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all the fields.", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Exit the method early
-        }
-        int rowCount = tableNguyenLieu.getRowCount(); // Số lượng dòng trong bảng
-        if (rowCount <= 0) {
-            JOptionPane.showMessageDialog(this, "Dữ liệu định lượng đang trống.", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Exit the method early
-        }
-        // Check if dataList is null
-
-        LayGiaTriChung();
-
+//        if (tenmon.isEmpty() || mota.isEmpty() || gia.isEmpty() || tenfileluudb.isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Please fill in all the fields.", "Error", JOptionPane.ERROR_MESSAGE);
+//            return; // Exit the method early
+//        }
+//        int rowCount = tableNguyenLieu.getRowCount(); // Số lượng dòng trong bảng
+//        if (rowCount <= 0) {
+//            JOptionPane.showMessageDialog(this, "Dữ liệu định lượng đang trống.", "Error", JOptionPane.ERROR_MESSAGE);
+//            return; // Exit the method early
+//        }
+//        // Check if dataList is null
+//
+//        LayGiaTriChung();
     }//GEN-LAST:event_btnThemMonAnActionPerformed
-
-    private void btnAddAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddAnhActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
-        int returnValue = fileChooser.showOpenDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-//            duongdananh = selectedFile.getAbsoluteFile();
-            tenFileGlobal = selectedFile.getName();
-            selectLuuFolder = selectedFile;
-            try {
-                BufferedImage image = ImageIO.read(selectedFile);
-                // Hiển thị ảnh trên JPanel
-                displayImageOnPanel(image);
-
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "Error adding image: " + ex.getMessage());
-            }
-        }
-    }//GEN-LAST:event_btnAddAnhActionPerformed
 
     private void btnHuyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHuyActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnHuyActionPerformed
-
-    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        this.dispose();
-    }//GEN-LAST:event_formWindowClosing
-
-    private void btnRemoveAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveAnhActionPerformed
-        Component[] components = panelAnh.getComponents(); // Lấy tất cả các thành phần con của panelAnh
-        for (Component component : components) {
-            if (component instanceof JLabel) { // Kiểm tra xem thành phần có phải là JLabel chứa hình ảnh không
-                panelAnh.remove(component); // Nếu là JLabel, xóa nó khỏi panelAnh
-                break; // Sau khi tìm và xóa thành phần đầu tiên, thoát khỏi vòng lặp
-            }
-        }
-        panelAnh.revalidate(); // Cập nhật panelAnh để hiển thị lại
-        panelAnh.repaint(); // Vẽ lại panelAnh
-    }//GEN-LAST:event_btnRemoveAnhActionPerformed
 
     /**
      * @param args the command line arguments
@@ -633,23 +525,24 @@ public class ThemMon extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ThemMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ThemMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ThemMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ThemMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    new ThemMon().setVisible(true);
+                    new SuaMon().setVisible(true);
                 } catch (IOException ex) {
-                    Logger.getLogger(ThemMon.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SuaMon.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

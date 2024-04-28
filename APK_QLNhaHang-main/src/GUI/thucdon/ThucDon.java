@@ -6,9 +6,19 @@ package GUI.thucdon;
 
 import DAO.ThucDonDao;
 import POJO.MonAn;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,6 +28,9 @@ import javax.swing.table.DefaultTableModel;
 public class ThucDon extends javax.swing.JFrame {
 
     DefaultTableModel dtm = new DefaultTableModel();
+    JMenuItem menuItem1 = new JMenuItem("Sửa");
+    JMenuItem menuItem2 = new JMenuItem("Xóa");
+    JMenuItem menuItem3 = new JMenuItem("Cập nhật giá");
 
     /**
      * Creates new form ThucDon
@@ -28,8 +41,7 @@ public class ThucDon extends javax.swing.JFrame {
         String[] tieuDe = {"Mã món", "Tên món", "Mã danh mục", "Giá", "Mô tả", "Hình ảnh"};
         dtm.setColumnIdentifiers(tieuDe);
         loadThucDon(new ThucDonDao().laydanhsachthucdon());
-        
-        
+
         tableDanhSach.setRowHeight(30);
         tableDanhSach.getColumnModel().getColumn(0).setPreferredWidth(30); // Mã món
         tableDanhSach.getColumnModel().getColumn(1).setPreferredWidth(200); // Tên món
@@ -38,6 +50,30 @@ public class ThucDon extends javax.swing.JFrame {
         tableDanhSach.getColumnModel().getColumn(4).setPreferredWidth(300); // Mô tả
         tableDanhSach.getColumnModel().getColumn(5).setPreferredWidth(150); // 
 
+        tableDanhSach.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    // Lấy dòng và cột được click
+                    int row = tableDanhSach.rowAtPoint(e.getPoint());
+                    int col = tableDanhSach.columnAtPoint(e.getPoint());                 
+                    showContextMenu(e.getX(), e.getY());
+                }
+            }
+        });
+
+    }
+
+    private void showContextMenu(int x, int y) {
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        // Tạo các mục menu
+        // Thêm các mục menu vào menu ngữ cảnh
+        popupMenu.add(menuItem1);
+        popupMenu.add(menuItem2);
+        popupMenu.add(menuItem3);
+        // Hiển thị menu ngữ cảnh tại vị trí được chỉ định bởi tọa độ x và y
+        popupMenu.show(tableDanhSach, x, y);
     }
 
     private void loadThucDon(ArrayList<MonAn> danhSach) {
@@ -102,12 +138,22 @@ public class ThucDon extends javax.swing.JFrame {
 
         jButton5.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jButton5.setText("Thêm");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         jButton6.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jButton6.setText("Sửa");
 
         jButton7.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jButton7.setText("Xóa");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         jButton8.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jButton8.setText("Cập nhật giá");
@@ -195,6 +241,38 @@ public class ThucDon extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        ThemMon them;
+        try {
+            them = new ThemMon();
+
+            them.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            them.setVisible(true);
+
+        } catch (IOException ex) {
+            Logger.getLogger(ThucDon.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        int selectedRow = tableDanhSach.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Hiển thị hộp thoại xác nhận
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa dòng này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Lấy model của bảng
+            DefaultTableModel model = (DefaultTableModel) tableDanhSach.getModel();
+
+            // Xóa dòng được chọn từ model
+            model.removeRow(selectedRow);
+        }
+    }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
      * @param args the command line arguments

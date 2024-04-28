@@ -152,4 +152,63 @@ public class ThucDonDao {
 
         return false;
     }
+
+    public static ArrayList<MonAn> getMonAn(int id) {
+        try {
+            ArrayList<MonAn> list = new ArrayList<>();
+            String sql = "select * from MonAn where monan_id = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                MonAn monan = new MonAn();
+                monan.setId(rs.getInt("monan_id"));
+                monan.setTenmon(rs.getString("ten_mon"));
+                monan.setIddanhmuc(rs.getInt("danh_muc_id"));
+
+                monan.setGiamon(rs.getString("gia"));
+                monan.setMota(rs.getString("mo_ta"));
+                monan.setHinhanh(rs.getString("hinh_anh"));
+                //nhanVien.setTrangThai(rs.getBoolean("TrangThai"));
+                list.add(monan);
+            }
+            provider.close();
+            return list;
+        } catch (SQLException ex) {
+            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    public static ArrayList<NguyenLieu_MonAn> getNguyenLieu(int idmonan) {
+        try {
+            ArrayList<NguyenLieu_MonAn> list = new ArrayList<>();
+            String sql = "select * from MonAn_NguyenLieu_Default where monan_id = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, idmonan);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                NguyenLieu_MonAn monan = new NguyenLieu_MonAn();
+                monan.setIdmon(rs.getInt("monan_id"));
+                monan.setIdnguyenlieu(rs.getInt("nguyenlieu_id"));
+                monan.setTennguyenlieu(rs.getString("tennguyenlieu"));
+
+                monan.setDonvi(rs.getString("donvitinh"));
+                monan.setSoluong(rs.getFloat("soluong"));
+               
+                //nhanVien.setTrangThai(rs.getBoolean("TrangThai"));
+                list.add(monan);
+            }
+            provider.close();
+            return list;
+        } catch (SQLException ex) {
+            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 }

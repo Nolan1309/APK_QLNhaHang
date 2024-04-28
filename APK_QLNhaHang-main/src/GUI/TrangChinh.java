@@ -33,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 import static DAO.SharedPreferences.getPassword;
 import static DAO.SharedPreferences.getUser;
 import static DAO.SharedPreferences.clearCredentials;
+import GUI.thucdon.ThucDon;
 import java.util.ArrayList;
 
 /**
@@ -41,13 +42,15 @@ import java.util.ArrayList;
  */
 public class TrangChinh extends javax.swing.JFrame {
 
+    String thumuc = "F:\\Code\\Java\\BaoCao\\Son_Qui\\APK_QLNhaHang-main\\src\\folder\\";
+
     /**
      * Creates new form TrangChinh
      */
     public TrangChinh() {
         initComponents();
         setTitle("Quản lý nhà hàng");
-        ImageIcon icon = new ImageIcon("C:\\Users\\Admin\\Documents\\NetBeansProjects\\UIAPP\\src\\folder\\logo.png");
+        ImageIcon icon = new ImageIcon(thumuc + "logo.png");
         Image img = icon.getImage();
         setIconImage(img);
         addThucDon();
@@ -81,7 +84,7 @@ public class TrangChinh extends javax.swing.JFrame {
     private void addThucDon() {
         panelThucDon.setLayout(new GridLayout(0, 5)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
 
-        ImageIcon icon = new ImageIcon("C:\\Users\\ASUS\\Downloads\\APK_QLNhaHang-main\\APK_QLNhaHang-main\\src\\folder\\BanhCanh.jpg"); // Đường dẫn của hình ảnh
+        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
         Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
@@ -99,7 +102,7 @@ public class TrangChinh extends javax.swing.JFrame {
     private void addThucUong() {
         panelThucUong.setLayout(new GridLayout(0, 5)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
 
-        ImageIcon icon = new ImageIcon("C:\\Users\\ASUS\\Downloads\\APK_QLNhaHang-main\\APK_QLNhaHang-main\\src\\folder\\BanhCanh.jpg"); // Đường dẫn của hình ảnh
+        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
         Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
@@ -490,6 +493,16 @@ public class TrangChinh extends javax.swing.JFrame {
         menuBar.add(menuTrangchu);
 
         menuThucdon.setText("Thực đơn");
+        menuThucdon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuThucdonMouseClicked(evt);
+            }
+        });
+        menuThucdon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuThucdonActionPerformed(evt);
+            }
+        });
         menuBar.add(menuThucdon);
 
         menuLichlam.setText("Lịch làm");
@@ -696,6 +709,16 @@ public class TrangChinh extends javax.swing.JFrame {
         ProfileAccount pf = new ProfileAccount();
         pf.setVisible(true);
     }//GEN-LAST:event_menuProfileActionPerformed
+
+    private void menuThucdonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuThucdonActionPerformed
+
+    }//GEN-LAST:event_menuThucdonActionPerformed
+
+    private void menuThucdonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuThucdonMouseClicked
+        ThucDon order = new ThucDon();
+        order.setVisible(true);
+        order.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }//GEN-LAST:event_menuThucdonMouseClicked
 
     /**
      * @param args the command line arguments
