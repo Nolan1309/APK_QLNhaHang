@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.lang.model.util.Types;
 
 /**
  *
@@ -123,34 +124,9 @@ public class ThucDonDao {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         return -1;
-    }
-
-    public static boolean InsertNguyenLieu_MonAn(NguyenLieu_MonAn nguyenlieu) {
-        try {
-            String sql = "INSERT INTO MonAn_NguyenLieu_Default (monan_id, nguyenlieu_id, tennguyenlieu, donvitinh, soluong) values(?,?,?,?,?)";
-            Connect provider = new Connect();
-
-            Connection connection = provider.ketNoiCSDL();
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, nguyenlieu.getIdmon());
-            statement.setInt(2, nguyenlieu.getIdnguyenlieu());
-            statement.setString(3, nguyenlieu.getTennguyenlieu());
-            statement.setString(4, nguyenlieu.getDonvi());
-            statement.setFloat(5, nguyenlieu.getSoluong());
-
-            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
-
-            provider.close();
-
-            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
-        } catch (SQLException ex) {
-            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return false;
     }
 
     public static ArrayList<MonAn> getMonAn(int id) {
@@ -178,10 +154,65 @@ public class ThucDonDao {
             provider.close();
             return list;
         } catch (SQLException ex) {
-            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
+
+    public static Boolean UpdateMonAn(int idmonan, String ten, int iddanhmuc, String gia, String mota, String hinhanh) {
+        try {
+//            String sql = "UPDATE MonAn \n"
+//                    + "SET ten_mon = N'"+ten +"', danh_muc_id = "+iddanhmuc+", gia = '"+gia+"', mo_ta = N'"+mota+"', hinh_anh = '"+hinhanh+"' \n"
+//                    + "WHERE monan_id = "+idmonan;
+
+            String sql = "UPDATE MonAn SET ten_mon = ?, danh_muc_id = ?, gia = ?, mo_ta = ?, hinh_anh = ? WHERE monan_id = ?";
+            System.out.println(sql);
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, ten);
+            statement.setInt(2, iddanhmuc);
+
+            statement.setString(3, gia);
+            statement.setString(4, mota);
+            statement.setString(5, hinhanh);
+
+            statement.setInt(6, idmonan);
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    public static Boolean DeleteMonAn(int idmonan) {
+        try {
+            String sql = "delete MonAn where monan_id  = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, idmonan);
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
     public static ArrayList<NguyenLieu_MonAn> getNguyenLieu(int idmonan) {
         try {
             ArrayList<NguyenLieu_MonAn> list = new ArrayList<>();
@@ -200,15 +231,154 @@ public class ThucDonDao {
 
                 monan.setDonvi(rs.getString("donvitinh"));
                 monan.setSoluong(rs.getFloat("soluong"));
-               
+
                 //nhanVien.setTrangThai(rs.getBoolean("TrangThai"));
                 list.add(monan);
             }
             provider.close();
             return list;
         } catch (SQLException ex) {
-            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
+
+    public static boolean InsertNguyenLieu_MonAn(NguyenLieu_MonAn nguyenlieu) {
+        try {
+            String sql = "INSERT INTO MonAn_NguyenLieu_Default (monan_id, nguyenlieu_id, tennguyenlieu, donvitinh, soluong) values(?,?,?,?,?)";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, nguyenlieu.getIdmon());
+            statement.setInt(2, nguyenlieu.getIdnguyenlieu());
+            statement.setString(3, nguyenlieu.getTennguyenlieu());
+            statement.setString(4, nguyenlieu.getDonvi());
+            statement.setFloat(5, nguyenlieu.getSoluong());
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    public static Boolean KiemTraNguyenLieuTonTai(int idnguyenlieu, int idmonan) {
+        try {
+            String sql = "SELECT * FROM MonAn_NguyenLieu_Default WHERE nguyenlieu_id = ? and monan_id = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, idnguyenlieu);
+            statement.setInt(2, idmonan);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            boolean exists = resultSet.next();
+
+            provider.close();
+
+            return exists;
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    public static Boolean UpdateNguyenLieu(NguyenLieu_MonAn nguyenlieu) {
+        try {
+            String sql = "update MonAn_NguyenLieu_Default set soluong = ? where nguyenlieu_id = ? and monan_id = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setFloat(1, nguyenlieu.getSoluong());
+            statement.setInt(2, nguyenlieu.getIdnguyenlieu());
+            statement.setInt(3, nguyenlieu.getIdmon());
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    public static Boolean DeleteNguyenLieu(int idmonan, int idnguyenlieu) {
+        try {
+            String sql = "delete MonAn_NguyenLieu_Default where monan_id = ? and nguyenlieu_id  = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, idmonan);
+            statement.setInt(2, idnguyenlieu);
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    public static String getGiaTheoMon(int idmonan) {
+        try {
+            String giaca = "";
+            String sql = "select gia from MonAn where monan_id = ?";
+            Connect provider = new Connect();
+
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, idmonan);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) { // Di chuyển con trỏ ResultSet đến hàng đầu tiên và kiểm tra xem có dữ liệu không
+                giaca = rs.getString("gia"); // Lấy giá trị từ cột "gia"
+            }
+
+            return giaca;
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public static Boolean UpdateGiaTheoMon(int idmonan, String giaca) {
+        try {
+            String sql = "update MonAn set gia  = ? where monan_id = ?";
+            Connect provider = new Connect();
+            System.out.println(sql);
+            Connection connection = provider.ketNoiCSDL();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1,giaca );
+            statement.setFloat(2,idmonan );
+
+            int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
+
+            provider.close();
+
+            return rowsAffected > 0; // Trả về true nếu có ít nhất một dòng bị ảnh hưởng
+        } catch (SQLException ex) {
+            Logger.getLogger(ThucDonDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
 }

@@ -5,6 +5,7 @@
 package GUI;
 
 import DAO.AccountDAO;
+import DAO.Order_Load;
 import GUI.doanhthu.DishReport;
 import GUI.doanhthu.SalesReport;
 import GUI.doanhthu.TheIngredientsReport;
@@ -34,7 +35,14 @@ import static DAO.SharedPreferences.getPassword;
 import static DAO.SharedPreferences.getUser;
 import static DAO.SharedPreferences.clearCredentials;
 import GUI.thucdon.ThucDon;
+import POJO.MonAn;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  *
@@ -81,22 +89,68 @@ public class TrangChinh extends javax.swing.JFrame {
         panelBanAn.add(button2);
     }
 
+//    private void addThucDon() {
+//        panelThucDon.setLayout(new GridLayout(4, 0)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
+//        Order_Load load = new Order_Load();
+//        ArrayList<MonAn> listmon = load.getThucDon();
+//
+//        for (MonAn mon : listmon) {
+//            String hinhanh = mon.getHinhanh();
+//            String tenmon= mon.getTenmon();
+//            String giaca = mon.getGiamon();
+//            ImageIcon icon = new ImageIcon(thumuc + hinhanh); // Đường dẫn của hình ảnh
+//            Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
+//            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+//            JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>("+giaca+")</html>", scaledIcon);
+//            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+//            panelThucDon.add(checkBox);
+//        }
+//
+////        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
+////        Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
+////        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+////        for (int i = 1; i <= 20; i++) {
+////            JCheckBox checkBox = new JCheckBox("<html>Món " + i + "<br>(250.000đ)</html>", scaledIcon);
+////            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+////            panelThucDon.add(checkBox);
+////        }
+//        panelThucDon.setBackground(Color.WHITE);
+//        int padding = 15;
+//        panelThucDon.setBorder(new EmptyBorder(padding - padding, padding + 5, padding, padding));
+//    }
     private void addThucDon() {
-        panelThucDon.setLayout(new GridLayout(0, 5)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
+        panelThucDon.setLayout(new GridBagLayout());
+        Order_Load load = new Order_Load();
+        ArrayList<MonAn> listmon = load.getThucDon();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
 
-        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
-        Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        for (int i = 1; i <= 20; i++) {
-            JCheckBox checkBox = new JCheckBox("<html>Món " + i + "<br>(250.000đ)</html>", scaledIcon);
+        for (int i = 0; i < listmon.size(); i++) {
+            MonAn mon = listmon.get(i);
+            String hinhanh = mon.getHinhanh();
+            String tenmon = mon.getTenmon();
+            String giaca = mon.getGiamon();
+            ImageIcon icon = new ImageIcon(thumuc + hinhanh);
+            Image scaledImage = icon.getImage().getScaledInstance(60, 80, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
+            checkBox.setPreferredSize(new Dimension(150, 100));
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
-            panelThucDon.add(checkBox);
+
+            panelThucDon.add(checkBox, gbc);
+
+            gbc.gridx++;
+            if (gbc.gridx >= 5) {
+                gbc.gridx = 0;
+                gbc.gridy++;
+            }
         }
-        panelThucDon.setBackground(Color.WHITE);
-        // Thêm padding vào panel
-        int padding = 15;
-        panelThucDon.setBorder(new EmptyBorder(padding - padding, padding + 5, padding, padding));
+        jScrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+//        jScrollPane2.setViewportView();
+
     }
 
     private void addThucUong() {
@@ -181,6 +235,8 @@ public class TrangChinh extends javax.swing.JFrame {
         panelRight = new javax.swing.JPanel();
         panelTab = new javax.swing.JTabbedPane();
         panelBanAn = new javax.swing.JPanel();
+        panelChua = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
         panelThucDon = new javax.swing.JPanel();
         panelThucUong = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
@@ -429,14 +485,33 @@ public class TrangChinh extends javax.swing.JFrame {
         panelThucDon.setLayout(panelThucDonLayout);
         panelThucDonLayout.setHorizontalGroup(
             panelThucDonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 661, Short.MAX_VALUE)
+            .addGap(0, 639, Short.MAX_VALUE)
         );
         panelThucDonLayout.setVerticalGroup(
             panelThucDonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 723, Short.MAX_VALUE)
+            .addGap(0, 699, Short.MAX_VALUE)
         );
 
-        panelTab.addTab("THỨC ĂN", panelThucDon);
+        jScrollPane2.setViewportView(panelThucDon);
+
+        javax.swing.GroupLayout panelChuaLayout = new javax.swing.GroupLayout(panelChua);
+        panelChua.setLayout(panelChuaLayout);
+        panelChuaLayout.setHorizontalGroup(
+            panelChuaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelChuaLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 641, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        panelChuaLayout.setVerticalGroup(
+            panelChuaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelChuaLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        panelTab.addTab("THỨC ĂN", panelChua);
 
         javax.swing.GroupLayout panelThucUongLayout = new javax.swing.GroupLayout(panelThucUong);
         panelThucUong.setLayout(panelThucUongLayout);
@@ -772,6 +847,7 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
@@ -790,6 +866,7 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JMenu menuThucdon;
     private javax.swing.JMenu menuTrangchu;
     private javax.swing.JPanel panelBanAn;
+    private javax.swing.JPanel panelChua;
     private javax.swing.JPanel panelLeft;
     private javax.swing.JPanel panelLeft_Center;
     private javax.swing.JPanel panelLeft_Top;

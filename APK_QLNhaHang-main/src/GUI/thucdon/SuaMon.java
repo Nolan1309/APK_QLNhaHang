@@ -10,10 +10,17 @@ import POJO.MonAn;
 import POJO.NguyenLieu;
 import POJO.NguyenLieu_MonAn;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.IIOException;
@@ -21,7 +28,10 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -31,17 +41,20 @@ import javax.swing.table.DefaultTableModel;
  */
 public class SuaMon extends javax.swing.JFrame {
 
-    int idmonan = 11;
+    int idmonan;
     int danhmuc;
     DefaultTableModel dtm = new DefaultTableModel();
     String thumuc = "F:\\Code\\Java\\BaoCao\\Son_Qui\\APK_QLNhaHang-main\\src\\folder\\";
     String tenFileGlobal = "";
     File selectLuuFolder;
 
+    JMenuItem menuItemXoa = new JMenuItem("Xóa");
+
     /**
      * Creates new form XoaMon
      */
-    public SuaMon() throws IOException {
+    public SuaMon(int idMON) throws IOException {
+        idmonan = idMON;
         initComponents();
         loadDanhMucMonAn();
         loadNguyenLieu();
@@ -53,6 +66,92 @@ public class SuaMon extends javax.swing.JFrame {
         tableNguyenLieu.setModel(dtm);
         tableNguyenLieu.setRowHeight(30);
         loadNguyenLieuTable();
+
+        // Add an ItemListener to the ComboBox
+        cbNguyenlieu.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+
+                    String selectedItem = (String) cbNguyenlieu.getSelectedItem();
+
+                    ThucDonDao thucdon = new ThucDonDao();
+                    String idmon = String.valueOf(idmonan);
+                    ArrayList<NguyenLieu_MonAn> listmon = NguyenLieu_MonAn_Default(idmon);
+                    NguyenLieu_MonAn selectedNguyenLieu = null;
+                    for (NguyenLieu_MonAn nl : listmon) {
+                        if (nl.getTennguyenlieu().equals(selectedItem)) {
+                            selectedNguyenLieu = nl;
+                            break;
+                        }
+                    }
+                    if (selectedNguyenLieu == null) {
+//                        int rowIndex = tableNguyenLieu.getModel().getRowCount();
+//                        dtm.addRow(new Object[]{selectedNguyenLieu.getId(), selectedNguyenLieu.getTennguyenlieu(), selectedNguyenLieu.getDonvi(), "0"});
+                        addSelectedNguyenLieuToTable();
+                    }
+
+                }
+            }
+        });
+        tableNguyenLieu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    // Lấy dòng và cột được click
+                    int row = tableNguyenLieu.rowAtPoint(e.getPoint());
+                    int col = tableNguyenLieu.columnAtPoint(e.getPoint());
+                    showContextMenu(e.getX(), e.getY());
+                }
+            }
+        });
+        menuItemXoa.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get the selected row index
+                int selectedRow = tableNguyenLieu.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(SuaMon.this, "Vui lòng chọn một hàng để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Display a confirmation dialog
+                int confirm = JOptionPane.showConfirmDialog(SuaMon.this, "Bạn có chắc muốn xóa hàng này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    DefaultTableModel model = (DefaultTableModel) tableNguyenLieu.getModel();
+                    int idNguyenLieu = (int) model.getValueAt(selectedRow, 0); // Assuming the first column contains the ID
+                    try {
+                        // Attempt to delete the row from the database
+                        ThucDonDao object = new ThucDonDao();
+                        if (object.DeleteNguyenLieu(idmonan, idNguyenLieu)) {
+                            // If deletion from the database is successful, remove the row from the table
+                            model.removeRow(selectedRow);
+                            tableNguyenLieu.repaint();
+                            JOptionPane.showMessageDialog(SuaMon.this, "Đã xóa dữ liệu thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            model.removeRow(selectedRow);
+                            tableNguyenLieu.repaint();
+                            JOptionPane.showMessageDialog(SuaMon.this, "Đã xóa", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace(); // Log the exception
+                        JOptionPane.showMessageDialog(SuaMon.this, "Đã xảy ra lỗi khi xóa dữ liệu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
+    }
+
+    private void showContextMenu(int x, int y) {
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        // Tạo các mục menu
+        // Thêm các mục menu vào menu ngữ cảnh
+        popupMenu.add(menuItemXoa);
+
+        // Hiển thị menu ngữ cảnh tại vị trí được chỉ định bởi tọa độ x và y
+        popupMenu.show(tableNguyenLieu, x, y);
     }
 
     private void loadThongTinChung() throws IOException {
@@ -96,11 +195,10 @@ public class SuaMon extends javax.swing.JFrame {
         ThucDonDao thucdon = new ThucDonDao();
         ArrayList<NguyenLieu_MonAn> listmonan = thucdon.getNguyenLieu(idmonan);
         // Create a new DefaultTableModel for the table
-        
 
         // Add each NguyenLieu_MonAn object to the table
         for (NguyenLieu_MonAn nguyenlieu : listmonan) {
-            Object[] row = {nguyenlieu.getIdnguyenlieu(), nguyenlieu.getTennguyenlieu(),nguyenlieu.getDonvi(),nguyenlieu.getSoluong()};
+            Object[] row = {nguyenlieu.getIdnguyenlieu(), nguyenlieu.getTennguyenlieu(), nguyenlieu.getDonvi(), nguyenlieu.getSoluong()};
             dtm.addRow(row);
         }
     }
@@ -120,6 +218,100 @@ public class SuaMon extends javax.swing.JFrame {
         cbNguyenlieu.removeAllItems(); // Remove any existing items in the ComboBox
         for (NguyenLieu nl : listNguyenLieu) {
             cbNguyenlieu.addItem(nl.getTennguyenlieu());
+        }
+    }
+
+    private void LayGiaTriChung(int iddanhmuc, String tenmon, String gia, String mota, String filename) {
+        ThucDonDao thucdon = new ThucDonDao();
+        thucdon.UpdateMonAn(idmonan, tenmon, iddanhmuc, gia, mota, filename);
+
+//        System.out.println(tenmon);
+//        System.out.println(mota);
+//        System.out.println(gia);
+//        System.out.println(tenFileGlobal);
+//        System.out.println(iddanhmuc);
+//        System.out.println(selectLuuFolder);
+        //Cập nhật ảnh lại trong folder
+        if (selectLuuFolder != null) {
+            try {
+                BufferedImage image = ImageIO.read(selectLuuFolder);
+                File destinationFile = new File(thumuc + tenFileGlobal);
+                ImageIO.write(image, "jpg", destinationFile);
+            } catch (IOException ex) {
+                Logger.getLogger(SuaMon.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        String idmon = String.valueOf(idmonan);
+        ArrayList<NguyenLieu_MonAn> listmon = NguyenLieu_MonAn_Default(idmon);
+        for (NguyenLieu_MonAn nguyenLieu_MonAn : listmon) {
+            int idnguyelieu = nguyenLieu_MonAn.getIdnguyenlieu();
+            if (thucdon.KiemTraNguyenLieuTonTai(idnguyelieu, idmonan)) {
+                thucdon.UpdateNguyenLieu(nguyenLieu_MonAn);
+
+            } else {
+                thucdon.InsertNguyenLieu_MonAn(nguyenLieu_MonAn);
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Cập nhật thành công !", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }
+    //Lấy dữ liệu từ Nguyên liệu để lưu
+
+    private ArrayList<ArrayList<Object>> getDataFromTable() {
+        DefaultTableModel model = (DefaultTableModel) tableNguyenLieu.getModel();
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+        Object[][] data = new Object[rowCount][columnCount];
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+                data[i][j] = model.getValueAt(i, j);
+            }
+        }
+        ArrayList<ArrayList<Object>> dataList = new ArrayList<>();
+        for (Object[] row : data) {
+            ArrayList<Object> rowList = new ArrayList<>(Arrays.asList(row));
+            dataList.add(rowList);
+        }
+        return dataList;
+    }
+
+    private ArrayList<NguyenLieu_MonAn> NguyenLieu_MonAn_Default(String id_Mon) {
+        ArrayList<NguyenLieu_MonAn> list = new ArrayList<>();
+
+        ArrayList<ArrayList<Object>> dataList = getDataFromTable();
+        for (ArrayList<Object> row : dataList) {
+            Object firstElement0 = row.get(0);
+            Object firstElement1 = row.get(1); //Tên nguyên liệu
+            Object firstElement2 = row.get(2); // Đơn vị
+            Object firstElement3 = row.get(3); // Số lượng
+
+            NguyenLieu_MonAn nguyenlieu = new NguyenLieu_MonAn();
+
+            nguyenlieu.setIdmon(Integer.parseInt(id_Mon.toString()));
+            nguyenlieu.setIdnguyenlieu(Integer.parseInt(firstElement0.toString()));
+            nguyenlieu.setTennguyenlieu(firstElement1.toString());
+            nguyenlieu.setDonvi(firstElement2.toString());
+            nguyenlieu.setSoluong(Float.parseFloat(firstElement3.toString()));
+            list.add(nguyenlieu);
+        }
+        return list;
+    }
+
+    private void addSelectedNguyenLieuToTable() {
+        String selectedItem = (String) cbNguyenlieu.getSelectedItem();
+        ThucDonDao thucdon = new ThucDonDao();
+        ArrayList<NguyenLieu> listNguyenLieu = thucdon.loadMenuNguyenLieu();
+        NguyenLieu selectedNguyenLieu = null;
+        for (NguyenLieu nl : listNguyenLieu) {
+            if (nl.getTennguyenlieu().equals(selectedItem)) {
+                selectedNguyenLieu = nl;
+                break;
+            }
+        }
+        if (selectedNguyenLieu != null) {
+            int rowIndex = tableNguyenLieu.getModel().getRowCount();
+            dtm.addRow(new Object[]{selectedNguyenLieu.getId(), selectedNguyenLieu.getTennguyenlieu(), selectedNguyenLieu.getDonvi(), "0"});
         }
     }
 
@@ -446,23 +638,23 @@ public class SuaMon extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddAnhActionPerformed
-//        JFileChooser fileChooser = new JFileChooser();
-//        fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
-//        int returnValue = fileChooser.showOpenDialog(null);
-//        if (returnValue == JFileChooser.APPROVE_OPTION) {
-//            File selectedFile = fileChooser.getSelectedFile();
-//            //            duongdananh = selectedFile.getAbsoluteFile();
-//            tenFileGlobal = selectedFile.getName();
-//            selectLuuFolder = selectedFile;
-//            try {
-//                BufferedImage image = ImageIO.read(selectedFile);
-//                // Hiển thị ảnh trên JPanel
-//                displayImageOnPanel(image);
-//
-//            } catch (IOException ex) {
-//                JOptionPane.showMessageDialog(null, "Error adding image: " + ex.getMessage());
-//            }
-//        }
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            //            duongdananh = selectedFile.getAbsoluteFile();
+            tenFileGlobal = selectedFile.getName();
+            selectLuuFolder = selectedFile;
+            try {
+                BufferedImage image = ImageIO.read(selectedFile);
+                // Hiển thị ảnh trên JPanel
+                displayImageOnPanel(image);
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Error adding image: " + ex.getMessage());
+            }
+        }
     }//GEN-LAST:event_btnAddAnhActionPerformed
 
     private void btnRemoveAnhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveAnhActionPerformed
@@ -478,30 +670,43 @@ public class SuaMon extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRemoveAnhActionPerformed
 
     private void btnThemMonAnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemMonAnActionPerformed
-      
+
         String tenmon = txtTenMon.getText();
         String mota = txtMoTa.getText();
         String gia = txtGia.getText();
         String tenfileluudb = tenFileGlobal;
-        
-        System.out.println(tenmon);
-        System.out.println(mota);
-        System.out.println(gia);
-        System.out.println(tenfileluudb);
-        System.out.println(danhmuc);
-        // Check if any of the fields are empty or null
-//        if (tenmon.isEmpty() || mota.isEmpty() || gia.isEmpty() || tenfileluudb.isEmpty()) {
-//            JOptionPane.showMessageDialog(this, "Please fill in all the fields.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return; // Exit the method early
-//        }
-//        int rowCount = tableNguyenLieu.getRowCount(); // Số lượng dòng trong bảng
-//        if (rowCount <= 0) {
-//            JOptionPane.showMessageDialog(this, "Dữ liệu định lượng đang trống.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return; // Exit the method early
-//        }
-//        // Check if dataList is null
+
+        String selectedItem = (String) cbDanhMuc.getSelectedItem();
+        ThucDonDao thucdon = new ThucDonDao();
+        ArrayList<DanhMucMonAn> listNguyenLieu = thucdon.loadMenuDanhmuc();
+        DanhMucMonAn selectedDanhMuc = null;
+        for (DanhMucMonAn nl : listNguyenLieu) {
+            if (nl.getTendanhmuc().equals(selectedItem)) {
+                selectedDanhMuc = nl;
+                break;
+            }
+        }
+        int iddanhmuc = 0;
+        if (selectedDanhMuc != null) {
+            iddanhmuc = selectedDanhMuc.getId();
+        }
+        if (iddanhmuc == 0) {
+            iddanhmuc = danhmuc;
+        }
+
+//         Check if any of the fields are empty or null
+        if (tenmon.isEmpty() || mota.isEmpty() || gia.isEmpty() || tenfileluudb.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all the fields.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Exit the method early
+        }
+        int rowCount = tableNguyenLieu.getRowCount(); // Số lượng dòng trong bảng
+        if (rowCount <= 0) {
+            JOptionPane.showMessageDialog(this, "Dữ liệu định lượng đang trống.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Exit the method early
+        }
+        // Check if dataList is null
 //
-//        LayGiaTriChung();
+        LayGiaTriChung(iddanhmuc, tenmon, gia, mota, tenfileluudb);
     }//GEN-LAST:event_btnThemMonAnActionPerformed
 
     private void btnHuyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHuyActionPerformed
@@ -511,42 +716,42 @@ public class SuaMon extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new SuaMon().setVisible(true);
-                } catch (IOException ex) {
-                    Logger.getLogger(SuaMon.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(SuaMon.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                try {
+//                    new SuaMon().setVisible(true);
+//                } catch (IOException ex) {
+//                    Logger.getLogger(SuaMon.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddAnh;
