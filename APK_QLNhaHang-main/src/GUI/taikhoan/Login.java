@@ -127,10 +127,13 @@ public class Login extends javax.swing.JFrame {
 
         txtUsername.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         txtUsername.setForeground(new java.awt.Color(102, 102, 102));
+        txtUsername.setText("admin");
 
         jLabel3.setBackground(new java.awt.Color(102, 102, 102));
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setText("Password");
+
+        txtPass.setText("admin");
 
         btnLogin.setBackground(new java.awt.Color(0, 102, 102));
         btnLogin.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N

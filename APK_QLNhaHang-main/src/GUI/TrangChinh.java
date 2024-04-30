@@ -6,6 +6,7 @@ package GUI;
 
 import DAO.AccountDAO;
 import DAO.Order_Load;
+import DAO.Order_XuLy;
 import GUI.doanhthu.DishReport;
 import GUI.doanhthu.SalesReport;
 import GUI.doanhthu.TheIngredientsReport;
@@ -35,14 +36,31 @@ import static DAO.SharedPreferences.getPassword;
 import static DAO.SharedPreferences.getUser;
 import static DAO.SharedPreferences.clearCredentials;
 import GUI.thucdon.ThucDon;
+import POJO.BanAn;
+import POJO.DanhMucMonAn;
 import POJO.MonAn;
+import POJO.MonAnListModel;
+import POJO.NguyenLieu;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import POJO.Order;
+import POJO.Order_Detail;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
 
 /**
  *
@@ -51,6 +69,10 @@ import javax.swing.JScrollPane;
 public class TrangChinh extends javax.swing.JFrame {
 
     String thumuc = "F:\\Code\\Java\\BaoCao\\Son_Qui\\APK_QLNhaHang-main\\src\\folder\\";
+    public int idBanAnTrangChu = 1;
+    private ArrayList<JCheckBox> selectedCheckOrder = new ArrayList<>();
+    private ArrayList<MonAn> ArrayMonAn = new ArrayList<>();
+    DefaultTableModel tableModel = new DefaultTableModel();
 
     /**
      * Creates new form TrangChinh
@@ -61,15 +83,28 @@ public class TrangChinh extends javax.swing.JFrame {
         ImageIcon icon = new ImageIcon(thumuc + "logo.png");
         Image img = icon.getImage();
         setIconImage(img);
+
+        String[] tieuDe = {"ID", "Tên món", "Số lượng", "Giá tiền"};
+        tableModel.setColumnIdentifiers(tieuDe);
+        tableOrder.setRowHeight(40);
+        tableOrder.setModel(tableModel);
+        int columnIndex = 2; // chỉ số của cột bạn muốn thiết lập chiều rộng
+        int preferredWidth = 20; // chiều rộng mong muốn
+        tableOrder.getColumnModel().getColumn(columnIndex).setPreferredWidth(preferredWidth);
+        tableOrder.getColumnModel().getColumn(0).setPreferredWidth(preferredWidth);
+
         addThucDon();
         addBanAn();
         addThucUong();
         setLocationRelativeTo(null);
 
+        //lưu trữ đám mây dữ liệu
         String user = getUser();
         String pass = getPassword();
         getFullName(user, pass);
         // setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        LoadMenu();
     }
 
     void getFullName(String user, String pass) {
@@ -81,43 +116,88 @@ public class TrangChinh extends javax.swing.JFrame {
     }
 
     private void addBanAn() {
-        JButton button1 = new JButton("Bàn 1");
-        JButton button2 = new JButton("Bàn 2");
-        panelBanAn.setLayout(new FlowLayout());
-        // Thêm các checkbox vào panel
-        panelBanAn.add(button1);
-        panelBanAn.add(button2);
+        panelBanAn.setLayout(new GridBagLayout());
+        Order_Load load = new Order_Load();
+        ArrayList<BanAn> listban = load.getBanAn();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+
+        for (int i = 0; i < listban.size(); i++) {
+            BanAn ban = listban.get(i);
+            int idBan = ban.getIdban();
+            String tenBan = ban.getTenban();
+            String tinhTrang = ban.getTrangthai();
+
+            JButton button = new JButton("<html>" + tenBan + "<br>Tổng tiền : 100.000đ</html>");
+            button.setPreferredSize(new Dimension(180, 80)); // Thiết lập kích thước cho nút
+            button.setHorizontalAlignment(JButton.CENTER);
+
+            // Thiết lập màu nền cho nút dựa trên tình trạng
+            if (tinhTrang.equals("Có người")) {
+                button.setBackground(Color.YELLOW); // Màu đỏ cho tình trạng có người
+            } else {
+                Color lightGreen = new Color(163, 240, 182); // RGB của màu xanh nhạt
+                button.setBackground(lightGreen);
+            }
+
+            panelBanAn.add(button, gbc);
+
+            gbc.gridx++;
+            if (gbc.gridx >= 3) {
+                gbc.gridx = 0;
+                gbc.gridy++;
+            }
+            // Thêm ActionListener cho button
+            button.addActionListener(e -> {
+                idBanAnTrangChu = idBan;
+
+                txtBan.setText(tenBan);
+
+                Timestamp getTime = ban.getNgayGioDat();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                String timeOder = dateFormat.format(getTime);
+                txtDateOrder.setText(timeOder);
+
+                Order_XuLy xuly = new Order_XuLy();
+                ArrayList<Order> listorder = xuly.getOrderByBan(idBanAnTrangChu);
+                for (Order list : listorder) {
+
+                    int idOrder = list.getOrder_id();
+                    float giagiam = list.getGiamgia();
+                    float tongbillGoc = list.getTongbill();
+                    float tongtien = list.getThanhtien();
+                    String trangthai = list.getTrangthai();
+
+                    DecimalFormat formatter = new DecimalFormat("#,###");
+                    String formattedGiamBill = formatter.format(giagiam);
+                    txtGiamBill.setText(formattedGiamBill);
+
+                    String formattedTongBillGoc = formatter.format(tongbillGoc);
+                    txtBill.setText(formattedTongBillGoc);
+                    txtTongBill.setText(formattedTongBillGoc);
+
+                    String formattedTongTien = formatter.format(tongtien);
+                    txtTongTienPhaiTra.setText(formattedTongTien);
+
+                    ArrayList<Order_Detail> listOrderDetail = xuly.getOrderDetail(idOrder);
+                    tableModel.setRowCount(0);
+                    tableOrder.removeAll();
+                    for (Order_Detail itemOrder : listOrderDetail) {
+                        Object[] rowData = {itemOrder.getIdMonan(), itemOrder.getTenMonan(), itemOrder.getSoLuong(), itemOrder.getDonGia()};
+                        tableModel.addRow(rowData);
+                    }
+
+                }
+
+            });
+
+        }
+        scrollBanAn.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollBanAn.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     }
 
-//    private void addThucDon() {
-//        panelThucDon.setLayout(new GridLayout(4, 0)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
-//        Order_Load load = new Order_Load();
-//        ArrayList<MonAn> listmon = load.getThucDon();
-//
-//        for (MonAn mon : listmon) {
-//            String hinhanh = mon.getHinhanh();
-//            String tenmon= mon.getTenmon();
-//            String giaca = mon.getGiamon();
-//            ImageIcon icon = new ImageIcon(thumuc + hinhanh); // Đường dẫn của hình ảnh
-//            Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
-//            ImageIcon scaledIcon = new ImageIcon(scaledImage);
-//            JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>("+giaca+")</html>", scaledIcon);
-//            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
-//            panelThucDon.add(checkBox);
-//        }
-//
-////        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
-////        Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
-////        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-////        for (int i = 1; i <= 20; i++) {
-////            JCheckBox checkBox = new JCheckBox("<html>Món " + i + "<br>(250.000đ)</html>", scaledIcon);
-////            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
-////            panelThucDon.add(checkBox);
-////        }
-//        panelThucDon.setBackground(Color.WHITE);
-//        int padding = 15;
-//        panelThucDon.setBorder(new EmptyBorder(padding - padding, padding + 5, padding, padding));
-//    }
     private void addThucDon() {
         panelThucDon.setLayout(new GridBagLayout());
         Order_Load load = new Order_Load();
@@ -129,6 +209,7 @@ public class TrangChinh extends javax.swing.JFrame {
 
         for (int i = 0; i < listmon.size(); i++) {
             MonAn mon = listmon.get(i);
+            int idMon = mon.getId();
             String hinhanh = mon.getHinhanh();
             String tenmon = mon.getTenmon();
             String giaca = mon.getGiamon();
@@ -146,58 +227,115 @@ public class TrangChinh extends javax.swing.JFrame {
                 gbc.gridx = 0;
                 gbc.gridy++;
             }
-        }
-        jScrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jScrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-//        jScrollPane2.setViewportView();
 
+            // Thêm ActionListener cho checkbox
+            checkBox.addActionListener(e -> {
+                if (checkBox.isSelected()) {
+                    selectedCheckOrder.add(checkBox);
+                    ArrayMonAn.add(mon);
+                    LoadTableOrder();
+                    checkBox.setBackground(Color.GREEN);
+                } else {
+                    ArrayMonAn.remove(mon);
+                    selectedCheckOrder.remove(checkBox);
+                    LoadTableOrder();
+                    checkBox.setBackground(null);
+                }
+            });
+
+        }
+        scrollThucDon.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollThucDon.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    }
+
+    private void LoadMenu() {
+        Order_Load load = new Order_Load();
+        ArrayList<DanhMucMonAn> listdanhmuc = load.getMenu();
+        cbLoadMenu.removeAllItems();
+        for (DanhMucMonAn nl : listdanhmuc) {
+            cbLoadMenu.addItem(nl.getTendanhmuc());
+        }
+        cbLoadMenu.addItem("Tất cả");
     }
 
     private void addThucUong() {
-        panelThucUong.setLayout(new GridLayout(0, 5)); // GridLayout với 5 cột, số dòng sẽ tự điều chỉnh dựa vào số lượng components
+        panelThucUong.setLayout(new GridBagLayout());
+        Order_Load load = new Order_Load();
+        ArrayList<MonAn> listmon = load.getThucUong();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        ImageIcon icon = new ImageIcon(thumuc + "BanhCanh.jpg"); // Đường dẫn của hình ảnh
-        Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH); // Thiết lập kích thước mới
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        for (int i = 1; i <= 20; i++) {
-            JCheckBox checkBox = new JCheckBox("<html>Đồ uống " + i + "<br>(250.000đ)</html>", scaledIcon);
+        for (int i = 0; i < listmon.size(); i++) {
+            MonAn mon = listmon.get(i);
+            String hinhanh = mon.getHinhanh();
+            String tenmon = mon.getTenmon();
+            String giaca = mon.getGiamon();
+            ImageIcon icon = new ImageIcon(thumuc + hinhanh);
+            Image scaledImage = icon.getImage().getScaledInstance(80, 100, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            JCheckBox checkBox = new JCheckBox("<html>" + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
+            checkBox.setPreferredSize(new Dimension(150, 100));
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
-            panelThucUong.add(checkBox);
+
+            panelThucUong.add(checkBox, gbc);
+
+            gbc.gridx++;
+            if (gbc.gridx >= 3) {
+                gbc.gridx = 0;
+                gbc.gridy++;
+            }
+
+            // Thêm ActionListener cho checkbox
+            checkBox.addActionListener(e -> {
+                if (checkBox.isSelected()) {
+                    selectedCheckOrder.add(checkBox);
+                    ArrayMonAn.add(mon);
+                    LoadTableOrder();
+                    checkBox.setBackground(Color.GREEN);
+                } else {
+                    ArrayMonAn.remove(mon);
+
+                    selectedCheckOrder.remove(checkBox);
+                    LoadTableOrder();
+                    checkBox.setBackground(null);
+                }
+            });
+
         }
-        panelThucUong.setBackground(Color.WHITE);
-        // Thêm padding vào panel
-        int padding = 15;
-        panelThucUong.setBorder(new EmptyBorder(padding - padding, padding + 5, padding, padding));
+        scrollThucUong.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollThucUong.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     }
-//    // Tạo một JLabel để hiển thị thông tin các checkbox đã chọn
-//    JLabel selectedCheckBoxLabel = new JLabel("CheckBox đã chọn: ");
-//
-//    // Tạo ActionListener cho từng checkbox
-//    ActionListener actionListener = new ActionListener() {
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            StringBuilder selectedCheckBoxes = new StringBuilder();
-//            if (checkBox1.isSelected()) {
-//                selectedCheckBoxes.append(checkBox1.getText()).append(", ");
-//            }
-//            if (checkBox2.isSelected()) {
-//                selectedCheckBoxes.append(checkBox2.getText()).append(", ");
-//            }
-//            String selectedText = selectedCheckBoxes.toString();
-//            // Loại bỏ dấu phẩy và khoảng trắng cuối cùng nếu có
-//            if (!selectedText.isEmpty()) {
-//                selectedText = selectedText.substring(0, selectedText.length() - 2);
-//            }
-//            selectedCheckBoxLabel.setText("CheckBox đã chọn: " + selectedText);
-//        }
-//    };
-//
-//    // Đăng ký ActionListener cho các checkbox
-//    checkBox1.addActionListener(actionListener);
-//    checkBox2.addActionListener(actionListener);
-    // Thêm JLabel vào panel
-//    panelThucDon.add(selectedCheckBoxLabel);
+
+    public void LoadTableOrder() {
+        // Xóa sạch dữ liệu của tableModel
+        tableModel.setRowCount(0);
+
+        // Xóa sạch dữ liệu của danh sách danhsachorder
+        tableOrder.removeAll();
+        ArrayList<MonAn> danhsachorder = getArrayList();
+
+        MonAnListModel listModel = new MonAnListModel(danhsachorder);
+
+        // Thêm dữ liệu từ danh sách món ăn vào DefaultTableModel
+        for (MonAn monAn : danhsachorder) {
+            Object[] row = {monAn.getId(), monAn.getTenmon(), 1, monAn.getGiamon()};
+            tableModel.addRow(row);
+        }
+        // Gán renderer cho ô chứa panel
+//      tableOrder.getColumnModel().getColumn(2).setCellRenderer(new PanelRenderer());
+        tableOrder.getColumnModel().getColumn(2).setCellEditor(new PanelEditor());
+    }
+
+    // Phương thức để lấy danh sách các checkbox đã chọn
+    public ArrayList<JCheckBox> getSelectedCheckboxes() {
+        return selectedCheckOrder;
+    }
+
+    public ArrayList<MonAn> getArrayList() {
+        return ArrayMonAn;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -220,25 +358,40 @@ public class TrangChinh extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         txtNhanVien = new javax.swing.JLabel();
         panelLeft_Center = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
         jPanel1 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        txtNhapSDT = new javax.swing.JTextField();
+        btnApSDT = new javax.swing.JButton();
         jLabel15 = new javax.swing.JLabel();
-        jTextField6 = new javax.swing.JTextField();
+        txtTongBill = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
-        jTextField7 = new javax.swing.JTextField();
+        txtGiamBill = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
-        jTextField8 = new javax.swing.JTextField();
+        txtTongTienPhaiTra = new javax.swing.JTextField();
+        btnThanhToan = new javax.swing.JButton();
+        btnTamTinh = new javax.swing.JButton();
+        btnXuatBill = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tableOrder = new javax.swing.JTable();
         panelRight = new javax.swing.JPanel();
         panelTab = new javax.swing.JTabbedPane();
+        panelChuaBanAn = new javax.swing.JPanel();
+        scrollBanAn = new javax.swing.JScrollPane();
         panelBanAn = new javax.swing.JPanel();
         panelChua = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        scrollThucDon = new javax.swing.JScrollPane();
         panelThucDon = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        txtTimKiem = new javax.swing.JTextField();
+        btnTim = new javax.swing.JButton();
+        cbLoadMenu = new javax.swing.JComboBox<>();
+        btnLoc = new javax.swing.JButton();
+        panelChuaThucUong = new javax.swing.JPanel();
+        scrollThucUong = new javax.swing.JScrollPane();
         panelThucUong = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        txtThucUong = new javax.swing.JTextField();
+        btnTimKiemThucUong = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         menuTrangchu = new javax.swing.JMenu();
         menuKetca = new javax.swing.JMenuItem();
@@ -342,40 +495,52 @@ public class TrangChinh extends javax.swing.JFrame {
                 .addGap(0, 11, Short.MAX_VALUE))
         );
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane1.setViewportView(jList1);
-
         jLabel14.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel14.setText("Nhập SDT");
 
-        jTextField4.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jTextField4.setText("0");
+        txtNhapSDT.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        txtNhapSDT.setText("0");
 
-        jButton2.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jButton2.setText("Áp dụng");
+        btnApSDT.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnApSDT.setText("Áp dụng");
 
         jLabel15.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel15.setText("Tổng bill");
 
-        jTextField6.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jTextField6.setText("0");
-        jTextField6.setToolTipText("");
+        txtTongBill.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        txtTongBill.setText("0");
+        txtTongBill.setToolTipText("");
 
         jLabel16.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel16.setText("Giảm bill");
 
-        jTextField7.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jTextField7.setText("0");
+        txtGiamBill.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        txtGiamBill.setText("0");
 
         jLabel17.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel17.setText("Tổng tiền trả");
 
-        jTextField8.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jTextField8.setText("0");
+        txtTongTienPhaiTra.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        txtTongTienPhaiTra.setText("0");
+
+        btnThanhToan.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnThanhToan.setText("Thanh toán");
+        btnThanhToan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThanhToanActionPerformed(evt);
+            }
+        });
+
+        btnTamTinh.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTamTinh.setText("Tạm tính");
+
+        btnXuatBill.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnXuatBill.setText("Xuất Bill");
+        btnXuatBill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXuatBillActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -383,20 +548,29 @@ public class TrangChinh extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(41, 41, 41)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel14)
-                    .addComponent(jLabel15)
-                    .addComponent(jLabel16)
-                    .addComponent(jLabel17))
-                .addGap(86, 86, 86)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jTextField4)
-                    .addComponent(jTextField6)
-                    .addComponent(jTextField7)
-                    .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
-                .addGap(32, 32, 32)
-                .addComponent(jButton2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnXuatBill)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnTamTinh)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnThanhToan)
+                        .addGap(114, 114, 114))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel14)
+                            .addComponent(jLabel15)
+                            .addComponent(jLabel16)
+                            .addComponent(jLabel17))
+                        .addGap(86, 86, 86)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtNhapSDT)
+                            .addComponent(txtTongBill)
+                            .addComponent(txtGiamBill)
+                            .addComponent(txtTongTienPhaiTra, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
+                        .addGap(32, 32, 32)
+                        .addComponent(btnApSDT)))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -404,40 +578,58 @@ public class TrangChinh extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel14)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2))
+                    .addComponent(txtNhapSDT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnApSDT))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel15)
-                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTongBill, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtGiamBill, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTongTienPhaiTra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel17))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnTamTinh)
+                    .addComponent(btnThanhToan)
+                    .addComponent(btnXuatBill))
+                .addContainerGap())
         );
+
+        tableOrder.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tableOrder);
 
         javax.swing.GroupLayout panelLeft_CenterLayout = new javax.swing.GroupLayout(panelLeft_Center);
         panelLeft_Center.setLayout(panelLeft_CenterLayout);
         panelLeft_CenterLayout.setHorizontalGroup(
             panelLeft_CenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLeft_CenterLayout.createSequentialGroup()
+            .addGroup(panelLeft_CenterLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelLeft_CenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                .addGroup(panelLeft_CenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelLeft_CenterLayout.setVerticalGroup(
             panelLeft_CenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLeft_CenterLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 436, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -472,14 +664,33 @@ public class TrangChinh extends javax.swing.JFrame {
         panelBanAn.setLayout(panelBanAnLayout);
         panelBanAnLayout.setHorizontalGroup(
             panelBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 661, Short.MAX_VALUE)
+            .addGap(0, 639, Short.MAX_VALUE)
         );
         panelBanAnLayout.setVerticalGroup(
             panelBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 723, Short.MAX_VALUE)
+            .addGap(0, 747, Short.MAX_VALUE)
         );
 
-        panelTab.addTab("BÀN ĂN", panelBanAn);
+        scrollBanAn.setViewportView(panelBanAn);
+
+        javax.swing.GroupLayout panelChuaBanAnLayout = new javax.swing.GroupLayout(panelChuaBanAn);
+        panelChuaBanAn.setLayout(panelChuaBanAnLayout);
+        panelChuaBanAnLayout.setHorizontalGroup(
+            panelChuaBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelChuaBanAnLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrollBanAn)
+                .addContainerGap())
+        );
+        panelChuaBanAnLayout.setVerticalGroup(
+            panelChuaBanAnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelChuaBanAnLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrollBanAn)
+                .addContainerGap())
+        );
+
+        panelTab.addTab("BÀN ĂN", panelChuaBanAn);
 
         javax.swing.GroupLayout panelThucDonLayout = new javax.swing.GroupLayout(panelThucDon);
         panelThucDon.setLayout(panelThucDonLayout);
@@ -492,22 +703,75 @@ public class TrangChinh extends javax.swing.JFrame {
             .addGap(0, 699, Short.MAX_VALUE)
         );
 
-        jScrollPane2.setViewportView(panelThucDon);
+        scrollThucDon.setViewportView(panelThucDon);
+
+        txtTimKiem.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+
+        btnTim.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTim.setText("Tìm kiếm");
+        btnTim.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTimActionPerformed(evt);
+            }
+        });
+
+        cbLoadMenu.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+
+        btnLoc.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnLoc.setText("Lọc");
+        btnLoc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLocActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtTimKiem, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                    .addComponent(cbLoadMenu, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnTim, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnLoc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbLoadMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnLoc))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtTimKiem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnTim))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout panelChuaLayout = new javax.swing.GroupLayout(panelChua);
         panelChua.setLayout(panelChuaLayout);
         panelChuaLayout.setHorizontalGroup(
             panelChuaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelChuaLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelChuaLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 641, Short.MAX_VALUE)
+                .addGroup(panelChuaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scrollThucDon))
                 .addContainerGap())
         );
         panelChuaLayout.setVerticalGroup(
             panelChuaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelChuaLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelChuaLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(scrollThucDon, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -517,14 +781,68 @@ public class TrangChinh extends javax.swing.JFrame {
         panelThucUong.setLayout(panelThucUongLayout);
         panelThucUongLayout.setHorizontalGroup(
             panelThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 661, Short.MAX_VALUE)
+            .addGap(0, 639, Short.MAX_VALUE)
         );
         panelThucUongLayout.setVerticalGroup(
             panelThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 723, Short.MAX_VALUE)
+            .addGap(0, 699, Short.MAX_VALUE)
         );
 
-        panelTab.addTab("THỨC UỐNG", panelThucUong);
+        scrollThucUong.setViewportView(panelThucUong);
+
+        txtThucUong.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+
+        btnTimKiemThucUong.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTimKiemThucUong.setText("Tìm kiếm");
+        btnTimKiemThucUong.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTimKiemThucUongActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtThucUong, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnTimKiemThucUong)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtThucUong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnTimKiemThucUong))
+                .addContainerGap(37, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout panelChuaThucUongLayout = new javax.swing.GroupLayout(panelChuaThucUong);
+        panelChuaThucUong.setLayout(panelChuaThucUongLayout);
+        panelChuaThucUongLayout.setHorizontalGroup(
+            panelChuaThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelChuaThucUongLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelChuaThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrollThucUong)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        panelChuaThucUongLayout.setVerticalGroup(
+            panelChuaThucUongLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelChuaThucUongLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(scrollThucUong, javax.swing.GroupLayout.DEFAULT_SIZE, 658, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        panelTab.addTab("THỨC UỐNG", panelChuaThucUong);
 
         javax.swing.GroupLayout panelRightLayout = new javax.swing.GroupLayout(panelRight);
         panelRight.setLayout(panelRightLayout);
@@ -755,10 +1073,8 @@ public class TrangChinh extends javax.swing.JFrame {
         if (choi == JOptionPane.YES_OPTION) {
             // close the current form
             this.dispose();
-
             // open the Login form
             Login.main(null);
-
             clearCredentials();
         } else {
             setDefaultCloseOperation(0);
@@ -770,10 +1086,8 @@ public class TrangChinh extends javax.swing.JFrame {
         if (choi == JOptionPane.YES_OPTION) {
             // close the current form
             this.dispose();
-
             // open the Login form
             Login.main(null);
-
             clearCredentials();
         } else {
             setDefaultCloseOperation(0);
@@ -794,6 +1108,200 @@ public class TrangChinh extends javax.swing.JFrame {
         order.setVisible(true);
         order.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }//GEN-LAST:event_menuThucdonMouseClicked
+
+    private void btnTimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimActionPerformed
+        String tenmontimkiem = txtTimKiem.getText();
+        Order_Load timkiem = new Order_Load();
+        ArrayList<MonAn> list = timkiem.TimKiemMonAn(tenmontimkiem);
+        // Xóa các mục hiện tại trên giao diện
+        panelThucDon.removeAll();
+        // Hiển thị kết quả tìm kiếm mới
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+        for (int i = 0; i < list.size(); i++) {
+            MonAn mon = list.get(i);
+            String hinhanh = mon.getHinhanh();
+            String tenmon = mon.getTenmon();
+            String giaca = mon.getGiamon();
+            ImageIcon icon = new ImageIcon(thumuc + hinhanh);
+            Image scaledImage = icon.getImage().getScaledInstance(60, 80, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
+            checkBox.setPreferredSize(new Dimension(150, 100));
+            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+            panelThucDon.add(checkBox, gbc);
+            gbc.gridx++;
+            if (gbc.gridx >= 5) {
+                gbc.gridx = 0;
+                gbc.gridy++;
+            }
+
+            // Thêm ActionListener cho checkbox
+            checkBox.addActionListener(e -> {
+                if (checkBox.isSelected()) {
+                    selectedCheckOrder.add(checkBox);
+                    ArrayMonAn.add(mon);
+                    LoadTableOrder();
+                    checkBox.setBackground(Color.GREEN);
+                } else {
+                    ArrayMonAn.remove(mon);
+
+                    selectedCheckOrder.remove(checkBox);
+                    LoadTableOrder();
+                    checkBox.setBackground(null);
+                }
+            });
+
+        }
+        // Cập nhật giao diện
+        panelThucDon.revalidate();
+        panelThucDon.repaint();
+        // Scroll Bar
+        scrollThucDon.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollThucDon.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    }//GEN-LAST:event_btnTimActionPerformed
+
+    private void btnLocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLocActionPerformed
+        String tendanhmuc = (String) cbLoadMenu.getSelectedItem();
+        if (tendanhmuc == "Tất cả") {
+            panelThucDon.removeAll();
+            addThucDon();
+
+        } else {
+            Order_Load timkiem = new Order_Load();
+            ArrayList<DanhMucMonAn> list = timkiem.getMenu();
+            DanhMucMonAn selectDanhMuc = null;
+            for (DanhMucMonAn nl : list) {
+                if (nl.getTendanhmuc().equals(tendanhmuc)) {
+                    selectDanhMuc = nl;
+                    break;
+                }
+            }
+            int idDanhMuc = 1;
+            if (selectDanhMuc != null) {
+                idDanhMuc = selectDanhMuc.getId();
+            }
+
+            ArrayList<MonAn> listMonAn = timkiem.GetMonAnByidDanhMuc(idDanhMuc);
+
+            // Xóa các mục hiện tại trên giao diện
+            panelThucDon.removeAll();
+
+            // Hiển thị kết quả tìm kiếm mới
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+
+            for (int i = 0; i < listMonAn.size(); i++) {
+                MonAn mon = listMonAn.get(i);
+                String hinhanh = mon.getHinhanh();
+                String tenmon = mon.getTenmon();
+                String giaca = mon.getGiamon();
+                ImageIcon icon = new ImageIcon(thumuc + hinhanh);
+                Image scaledImage = icon.getImage().getScaledInstance(60, 80, Image.SCALE_SMOOTH);
+                ImageIcon scaledIcon = new ImageIcon(scaledImage);
+                JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
+                checkBox.setPreferredSize(new Dimension(150, 100));
+                checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+                panelThucDon.add(checkBox, gbc);
+                gbc.gridx++;
+                if (gbc.gridx >= 5) {
+                    gbc.gridx = 0;
+                    gbc.gridy++;
+                }
+
+                // Thêm ActionListener cho checkbox
+                checkBox.addActionListener(e -> {
+                    if (checkBox.isSelected()) {
+                        selectedCheckOrder.add(checkBox);
+                        ArrayMonAn.add(mon);
+                        LoadTableOrder();
+                        checkBox.setBackground(Color.GREEN);
+                    } else {
+                        ArrayMonAn.remove(mon);
+
+                        selectedCheckOrder.remove(checkBox);
+                        LoadTableOrder();
+                        checkBox.setBackground(null);
+                    }
+                });
+
+            }
+            // Cập nhật giao diện
+            panelThucDon.revalidate();
+            panelThucDon.repaint();
+            // Scroll Bar
+            scrollThucDon.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            scrollThucDon.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        }
+
+    }//GEN-LAST:event_btnLocActionPerformed
+
+    private void btnTimKiemThucUongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimKiemThucUongActionPerformed
+        String tenthucuong = txtThucUong.getText();
+        Order_Load timkiem = new Order_Load();
+        ArrayList<MonAn> listthucuong = timkiem.TimKiemThucUong(tenthucuong);
+        // Xóa các mục hiện tại trên giao diện
+        panelThucUong.removeAll();
+        // Hiển thị kết quả tìm kiếm mới
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+        for (int i = 0; i < listthucuong.size(); i++) {
+            MonAn mon = listthucuong.get(i);
+            String hinhanh = mon.getHinhanh();
+            String tenmon = mon.getTenmon();
+            String giaca = mon.getGiamon();
+            ImageIcon icon = new ImageIcon(thumuc + hinhanh);
+            Image scaledImage = icon.getImage().getScaledInstance(60, 80, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
+            checkBox.setPreferredSize(new Dimension(150, 100));
+            checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+            panelThucUong.add(checkBox, gbc);
+            gbc.gridx++;
+            if (gbc.gridx >= 3) {
+                gbc.gridx = 0;
+                gbc.gridy++;
+            }
+            // Thêm ActionListener cho checkbox
+            checkBox.addActionListener(e -> {
+                if (checkBox.isSelected()) {
+                    selectedCheckOrder.add(checkBox);
+                    ArrayMonAn.add(mon);
+                    LoadTableOrder();
+                    checkBox.setBackground(Color.GREEN);
+                } else {
+                    ArrayMonAn.remove(mon);
+
+                    selectedCheckOrder.remove(checkBox);
+                    LoadTableOrder();
+                    checkBox.setBackground(null);
+                }
+            });
+
+        }
+        // Cập nhật giao diện
+        panelThucUong.revalidate();
+        panelThucUong.repaint();
+        // Scroll Bar
+        scrollThucUong.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollThucUong.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    }//GEN-LAST:event_btnTimKiemThucUongActionPerformed
+
+    private void btnXuatBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXuatBillActionPerformed
+
+
+    }//GEN-LAST:event_btnXuatBillActionPerformed
+
+    private void btnThanhToanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThanhToanActionPerformed
+
+
+    }//GEN-LAST:event_btnThanhToanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -821,7 +1329,6 @@ public class TrangChinh extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(TrangChinh.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -831,7 +1338,14 @@ public class TrangChinh extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnApSDT;
+    private javax.swing.JButton btnLoc;
+    private javax.swing.JButton btnTamTinh;
+    private javax.swing.JButton btnThanhToan;
+    private javax.swing.JButton btnTim;
+    private javax.swing.JButton btnTimKiemThucUong;
+    private javax.swing.JButton btnXuatBill;
+    private javax.swing.JComboBox<String> cbLoadMenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel14;
@@ -841,17 +1355,13 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
-    private javax.swing.JTextField jTextField8;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu menuDoanhthu;
     private javax.swing.JMenuItem menuKetca;
@@ -867,6 +1377,8 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JMenu menuTrangchu;
     private javax.swing.JPanel panelBanAn;
     private javax.swing.JPanel panelChua;
+    private javax.swing.JPanel panelChuaBanAn;
+    private javax.swing.JPanel panelChuaThucUong;
     private javax.swing.JPanel panelLeft;
     private javax.swing.JPanel panelLeft_Center;
     private javax.swing.JPanel panelLeft_Top;
@@ -874,9 +1386,19 @@ public class TrangChinh extends javax.swing.JFrame {
     private javax.swing.JTabbedPane panelTab;
     private javax.swing.JPanel panelThucDon;
     private javax.swing.JPanel panelThucUong;
+    private javax.swing.JScrollPane scrollBanAn;
+    private javax.swing.JScrollPane scrollThucDon;
+    private javax.swing.JScrollPane scrollThucUong;
+    private javax.swing.JTable tableOrder;
     private javax.swing.JLabel txtBan;
     private javax.swing.JLabel txtBill;
     private javax.swing.JLabel txtDateOrder;
+    private javax.swing.JTextField txtGiamBill;
     private javax.swing.JLabel txtNhanVien;
+    private javax.swing.JTextField txtNhapSDT;
+    private javax.swing.JTextField txtThucUong;
+    private javax.swing.JTextField txtTimKiem;
+    private javax.swing.JTextField txtTongBill;
+    private javax.swing.JTextField txtTongTienPhaiTra;
     // End of variables declaration//GEN-END:variables
 }
