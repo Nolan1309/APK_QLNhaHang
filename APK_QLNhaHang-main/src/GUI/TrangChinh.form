@@ -248,7 +248,7 @@
                               <Component id="jLabel3" min="-2" pref="289" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="24" max="32767" attributes="0"/>
+                      <EmptySpace pref="27" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -398,7 +398,8 @@
                                   <Component id="btnTamTinh" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Component id="btnThanhToan" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="114" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="btnOrderMon" min="-2" pref="96" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -414,8 +415,8 @@
                                       <Component id="txtGiamBill" max="32767" attributes="0"/>
                                       <Component id="txtTongTienPhaiTra" pref="230" max="32767" attributes="0"/>
                                   </Group>
-                                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                                  <Component id="btnApSDT" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="btnApSDT" min="-2" pref="97" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace pref="18" max="32767" attributes="0"/>
@@ -451,6 +452,7 @@
                               <Component id="btnTamTinh" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="btnThanhToan" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="btnXuatBill" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnOrderMon" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -559,6 +561,17 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnXuatBillActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="btnOrderMon">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Times New Roman" size="14" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="&#x110;&#x1eb7;t m&#xf3;n"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnOrderMonActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

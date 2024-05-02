@@ -61,6 +61,10 @@ import POJO.Order;
 import POJO.Order_Detail;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.UIManager;
+import javax.swing.event.TableModelEvent;
 
 /**
  *
@@ -68,10 +72,16 @@ import java.text.DecimalFormat;
  */
 public class TrangChinh extends javax.swing.JFrame {
 
+    private JButton selectedButton;
+    private JButton ButtonOld;
+    private int selectedTableId = -1;
+
     String thumuc = "F:\\Code\\Java\\BaoCao\\Son_Qui\\APK_QLNhaHang-main\\src\\folder\\";
-    public int idBanAnTrangChu = 1;
-    private ArrayList<JCheckBox> selectedCheckOrder = new ArrayList<>();
-    private ArrayList<MonAn> ArrayMonAn = new ArrayList<>();
+    public int idBanAnTrangChu = 0;
+    public int idBanAnTrangChu_OLD = -1;
+    public ArrayList<Order> CheckTinhTrang = new ArrayList<>();
+    private ArrayList<JCheckBox> selectedCheckOrder = new ArrayList<>(); //Dùng để thêm vào table 
+    private ArrayList<MonAn> ArrayMonAn = new ArrayList<>(); //Song song với checkbox , dùng để gom dữ liệu đem đi order
     DefaultTableModel tableModel = new DefaultTableModel();
 
     /**
@@ -105,6 +115,8 @@ public class TrangChinh extends javax.swing.JFrame {
         // setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         LoadMenu();
+        KiemTraBan();
+
     }
 
     void getFullName(String user, String pass) {
@@ -123,9 +135,11 @@ public class TrangChinh extends javax.swing.JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+        // Khai báo một Map để lưu trữ trạng thái của các button đã chọn
+        Map<Integer, JButton> selectedButtonsMap = new HashMap<>();
 
         for (int i = 0; i < listban.size(); i++) {
-            BanAn ban = listban.get(i);
+            final BanAn ban = listban.get(i); // Đặt biến ban là final
             int idBan = ban.getIdban();
             String tenBan = ban.getTenban();
             String tinhTrang = ban.getTrangthai();
@@ -137,9 +151,11 @@ public class TrangChinh extends javax.swing.JFrame {
             // Thiết lập màu nền cho nút dựa trên tình trạng
             if (tinhTrang.equals("Có người")) {
                 button.setBackground(Color.YELLOW); // Màu đỏ cho tình trạng có người
+
             } else {
                 Color lightGreen = new Color(163, 240, 182); // RGB của màu xanh nhạt
                 button.setBackground(lightGreen);
+
             }
 
             panelBanAn.add(button, gbc);
@@ -149,52 +165,138 @@ public class TrangChinh extends javax.swing.JFrame {
                 gbc.gridx = 0;
                 gbc.gridy++;
             }
+            Order_XuLy xuly2 = new Order_XuLy();
             // Thêm ActionListener cho button
             button.addActionListener(e -> {
                 idBanAnTrangChu = idBan;
+                if (KiemTraQuaTrinhTaoMon() && !KiemTraBanTrong(idBanAnTrangChu_OLD)) {
 
-                txtBan.setText(tenBan);
+                    int result = JOptionPane.showConfirmDialog(this, "Bảng hiện có dữ liệu. Bạn có muốn tiếp tục?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        JButton clickedButton = (JButton) e.getSource();
+                        selectedButton = clickedButton;
+                        idBanAnTrangChu_OLD = idBanAnTrangChu;
+                        txtBan.setText(tenBan);
 
-                Timestamp getTime = ban.getNgayGioDat();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                String timeOder = dateFormat.format(getTime);
-                txtDateOrder.setText(timeOder);
+                        Timestamp getTime = ban.getNgayGioDat();
+                        if (getTime != null) {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                            String timeOder = dateFormat.format(getTime);
 
-                Order_XuLy xuly = new Order_XuLy();
-                ArrayList<Order> listorder = xuly.getOrderByBan(idBanAnTrangChu);
-                for (Order list : listorder) {
+                            txtDateOrder.setText(timeOder);
+                        } else {
+                            txtDateOrder.setText("0");
+                        }
 
-                    int idOrder = list.getOrder_id();
-                    float giagiam = list.getGiamgia();
-                    float tongbillGoc = list.getTongbill();
-                    float tongtien = list.getThanhtien();
-                    String trangthai = list.getTrangthai();
+                        Order_XuLy xuly = new Order_XuLy();
+                        ArrayList<Order> listorder = xuly.getOrderByBan(idBanAnTrangChu);
 
-                    DecimalFormat formatter = new DecimalFormat("#,###");
-                    String formattedGiamBill = formatter.format(giagiam);
-                    txtGiamBill.setText(formattedGiamBill);
+                        if (listorder.isEmpty()) {
+                            selectedCheckOrder.clear();
+                            ArrayMonAn.clear();
+                            txtBill.setText("0");
+                            txtTongBill.setText("0");
+                            txtTongTienPhaiTra.setText("0");
+                            tableModel.setRowCount(0);
+                            tableOrder.removeAll();
+                        } else {
 
-                    String formattedTongBillGoc = formatter.format(tongbillGoc);
-                    txtBill.setText(formattedTongBillGoc);
-                    txtTongBill.setText(formattedTongBillGoc);
+                            for (Order list : listorder) {
+                                int idOrder = list.getOrder_id();
+                                float giagiam = list.getGiamgia();
+                                float tongbillGoc = list.getTongbill();
+                                float tongtien = list.getThanhtien();
+                                String trangthai = list.getTrangthai();
 
-                    String formattedTongTien = formatter.format(tongtien);
-                    txtTongTienPhaiTra.setText(formattedTongTien);
+                                DecimalFormat formatter = new DecimalFormat("#,###");
+                                String formattedGiamBill = formatter.format(giagiam);
+                                txtGiamBill.setText(formattedGiamBill);
 
-                    ArrayList<Order_Detail> listOrderDetail = xuly.getOrderDetail(idOrder);
-                    tableModel.setRowCount(0);
-                    tableOrder.removeAll();
-                    for (Order_Detail itemOrder : listOrderDetail) {
-                        Object[] rowData = {itemOrder.getIdMonan(), itemOrder.getTenMonan(), itemOrder.getSoLuong(), itemOrder.getDonGia()};
-                        tableModel.addRow(rowData);
+                                String formattedTongBillGoc = formatter.format(tongbillGoc);
+                                txtBill.setText(formattedTongBillGoc);
+                                txtTongBill.setText(formattedTongBillGoc);
+
+                                String formattedTongTien = formatter.format(tongtien);
+                                txtTongTienPhaiTra.setText(formattedTongTien);
+
+                                ArrayList<Order_Detail> listOrderDetail = xuly.getOrderDetail(idOrder);
+                                tableModel.setRowCount(0);
+                                tableOrder.removeAll();
+                                for (Order_Detail itemOrder : listOrderDetail) {
+                                    Object[] rowData = {itemOrder.getIdMonan(), itemOrder.getTenMonan(), itemOrder.getSoLuong(), itemOrder.getDonGia()};
+                                    tableModel.addRow(rowData);
+                                }
+                            }
+
+                        }
+                    } else {
+                        return; // Không làm gì cả nếu người dùng không xác nhận
+                    }
+                } else {
+                    JButton clickedButton = (JButton) e.getSource();
+                    selectedButton = clickedButton;
+                    idBanAnTrangChu_OLD = idBanAnTrangChu;
+                    txtBan.setText(tenBan);
+
+                    Timestamp getTime = ban.getNgayGioDat();
+                    if (getTime != null) {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        String timeOder = dateFormat.format(getTime);
+
+                        txtDateOrder.setText(timeOder);
+                    } else {
+                        txtDateOrder.setText("0");
                     }
 
+                    Order_XuLy xuly = new Order_XuLy();
+                    ArrayList<Order> listorder = xuly.getOrderByBan(idBanAnTrangChu);
+
+                    if (listorder.isEmpty()) {
+                        selectedCheckOrder.clear();
+                        ArrayMonAn.clear();
+                        txtBill.setText("0");
+                        txtTongBill.setText("0");
+                        txtTongTienPhaiTra.setText("0");
+                        tableModel.setRowCount(0);
+                        tableOrder.removeAll();
+                    } else {
+
+                        for (Order list : listorder) {
+                            int idOrder = list.getOrder_id();
+                            float giagiam = list.getGiamgia();
+                            float tongbillGoc = list.getTongbill();
+                            float tongtien = list.getThanhtien();
+                            String trangthai = list.getTrangthai();
+
+                            DecimalFormat formatter = new DecimalFormat("#,###");
+                            String formattedGiamBill = formatter.format(giagiam);
+                            txtGiamBill.setText(formattedGiamBill);
+
+                            String formattedTongBillGoc = formatter.format(tongbillGoc);
+                            txtBill.setText(formattedTongBillGoc);
+                            txtTongBill.setText(formattedTongBillGoc);
+
+                            String formattedTongTien = formatter.format(tongtien);
+                            txtTongTienPhaiTra.setText(formattedTongTien);
+
+                            ArrayList<Order_Detail> listOrderDetail = xuly.getOrderDetail(idOrder);
+                            tableModel.setRowCount(0);
+                            tableOrder.removeAll();
+                            for (Order_Detail itemOrder : listOrderDetail) {
+                                Object[] rowData = {itemOrder.getIdMonan(), itemOrder.getTenMonan(), itemOrder.getSoLuong(), itemOrder.getDonGia()};
+                                tableModel.addRow(rowData);
+                            }
+                        }
+
+                    }
                 }
 
             });
 
         }
+
         scrollBanAn.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
         scrollBanAn.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     }
 
@@ -231,15 +333,38 @@ public class TrangChinh extends javax.swing.JFrame {
             // Thêm ActionListener cho checkbox
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
-                    selectedCheckOrder.add(checkBox);
-                    ArrayMonAn.add(mon);
-                    LoadTableOrder();
-                    checkBox.setBackground(Color.GREEN);
+                    System.out.println(idBanAnTrangChu);
+                    if (idBanAnTrangChu == 0) {
+                        // Hiển thị thông báo popup khi không chọn bàn
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                        checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                    } else {
+                        if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                            // Kiểm tra xem ô kiểm đã tồn tại trong danh sách chưa
+                            if (!isCheckBoxDuplicate(checkBox)) {
+                                // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
+                                selectedCheckOrder.add(checkBox);
+                                ArrayMonAn.add(mon);
+                                LoadTableOrder();
+                                checkBox.setBackground(Color.GREEN);
+                                UpdateGiaTienTXT();
+                            } else {
+
+                                // Nếu đã tồn tại, hiển thị thông báo đã có
+                                JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                                checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                            }
+                        }
+
+                    }
                 } else {
-                    ArrayMonAn.remove(mon);
-                    selectedCheckOrder.remove(checkBox);
-                    LoadTableOrder();
-                    checkBox.setBackground(null);
+                    if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                        ArrayMonAn.remove(mon);
+                        selectedCheckOrder.remove(checkBox);
+                        LoadTableOrder();
+                        checkBox.setBackground(null);
+                        UpdateGiaTienTXT();
+                    }
                 }
             });
 
@@ -287,19 +412,42 @@ public class TrangChinh extends javax.swing.JFrame {
                 gbc.gridy++;
             }
 
-            // Thêm ActionListener cho checkbox
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
-                    selectedCheckOrder.add(checkBox);
-                    ArrayMonAn.add(mon);
-                    LoadTableOrder();
-                    checkBox.setBackground(Color.GREEN);
-                } else {
-                    ArrayMonAn.remove(mon);
+                    if (idBanAnTrangChu == 0) {
+                        // Hiển thị thông báo popup khi không chọn bàn
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                        checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                    } else {
+                        System.out.println(idBanAnTrangChu);
+                        if (!KiemTraBanTrong(idBanAnTrangChu)) {
 
-                    selectedCheckOrder.remove(checkBox);
-                    LoadTableOrder();
-                    checkBox.setBackground(null);
+                            // Kiểm tra xem ô kiểm đã tồn tại trong danh sách chưa
+                            if (!isCheckBoxDuplicate(checkBox)) {
+                                // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
+                                selectedCheckOrder.add(checkBox);
+                                ArrayMonAn.add(mon);
+                                LoadTableOrder();
+                                checkBox.setBackground(Color.GREEN);
+                                UpdateGiaTienTXT();
+                            } else {
+
+                                // Nếu đã tồn tại, hiển thị thông báo đã có
+                                JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                                checkBox.setSelected(false); // Bỏ chọn ô kiểm
+
+                            }
+                        }
+
+                    }
+                } else {
+                    if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                        ArrayMonAn.remove(mon);
+                        selectedCheckOrder.remove(checkBox);
+                        LoadTableOrder();
+                        checkBox.setBackground(null);
+                        UpdateGiaTienTXT();
+                    }
                 }
             });
 
@@ -326,6 +474,18 @@ public class TrangChinh extends javax.swing.JFrame {
         // Gán renderer cho ô chứa panel
 //      tableOrder.getColumnModel().getColumn(2).setCellRenderer(new PanelRenderer());
         tableOrder.getColumnModel().getColumn(2).setCellEditor(new PanelEditor());
+
+        tableModel.addTableModelListener(e -> {
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
+                if (column == 2) { // Check if quantity column is updated
+                    int newValue = (int) tableModel.getValueAt(row, column);
+                    danhsachorder.get(row).s(newValue); 
+                }
+            }
+        });
+
     }
 
     // Phương thức để lấy danh sách các checkbox đã chọn
@@ -335,6 +495,82 @@ public class TrangChinh extends javax.swing.JFrame {
 
     public ArrayList<MonAn> getArrayList() {
         return ArrayMonAn;
+    }
+
+    public boolean KiemTraBanTrong(int idban) {
+        Order_XuLy xuly1 = new Order_XuLy();
+        boolean check = xuly1.KiemTraBanTrong(idban);
+        return check;
+    }
+
+    public void KiemTraBan() {
+        Order_XuLy xuly1 = new Order_XuLy();
+        ArrayList<Order> check = xuly1.KiemTraBan();
+        for (Order item : check) {
+            CheckTinhTrang.add(item);
+        }
+    }
+
+    private void refreshCheckBoxes() {
+        // Duyệt qua danh sách tạm thời và bỏ chọn các ô kiểm
+        for (JCheckBox checkBox : selectedCheckOrder) {
+            checkBox.setSelected(false);
+        }
+        // Xóa danh sách tạm thời
+        selectedCheckOrder.clear();
+    }
+
+    private boolean isCheckBoxDuplicate(JCheckBox checkBox) {
+        for (JCheckBox existingCheckBox : selectedCheckOrder) {
+            if (existingCheckBox.getText().equals(checkBox.getText())) {
+                return true; // Đã tồn tại checkbox với nội dung tương tự
+            }
+        }
+        return false; // Không tồn tại checkbox với nội dung tương tự
+    }
+
+    private boolean KiemTraQuaTrinhTaoMon() {
+        int rowCount = tableModel.getRowCount();
+        return rowCount > 0;
+    }
+
+    private void UpdateGiaTienTXT() {
+        int rowCount = tableOrder.getRowCount();
+        ArrayList<Order_Detail> listAddMonAn = new ArrayList<>();
+        float tongbill = 0;
+
+        // Kiểm tra xem bảng có dữ liệu không
+        if (rowCount > 0) {
+            for (int i = 0; i < rowCount; i++) {
+                Order_Detail item = new Order_Detail();
+
+                // Lấy dữ liệu từ bảng
+                Object idMonan = tableOrder.getValueAt(i, 0);
+                Object tenMonan = tableOrder.getValueAt(i, 1);
+                Object soLuong = tableOrder.getValueAt(i, 2);
+                Object dongia = tableOrder.getValueAt(i, 3);
+
+                // Kiểm tra null trước khi sử dụng
+                if (idMonan != null && tenMonan != null && soLuong != null && dongia != null) {
+                    // Chuyển đổi và tính tổng giá tiền
+                    try {
+                        float soLuongFloat = Float.parseFloat(soLuong.toString());
+                        float dongiaFloat = Float.parseFloat(dongia.toString());
+                        float thanhtienItem = soLuongFloat * dongiaFloat;
+                        tongbill += thanhtienItem;
+                    } catch (NumberFormatException ex) {
+                        // Xử lý ngoại lệ nếu không thể chuyển đổi
+                        ex.printStackTrace(); // Hoặc hiển thị cảnh báo cho người dùng
+                    }
+                }
+                listAddMonAn.add(item);
+            }
+        }
+
+        // Cập nhật giá trị lên các trường văn bản
+        txtBill.setText(String.format("%.1f", tongbill)); // Định dạng số với 2 số thập phân
+        txtTongBill.setText(String.format("%.1f", tongbill));
+        txtTongTienPhaiTra.setText(String.format("%.1f", tongbill));
     }
 
     /**
@@ -371,6 +607,7 @@ public class TrangChinh extends javax.swing.JFrame {
         btnThanhToan = new javax.swing.JButton();
         btnTamTinh = new javax.swing.JButton();
         btnXuatBill = new javax.swing.JButton();
+        btnOrderMon = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tableOrder = new javax.swing.JTable();
         panelRight = new javax.swing.JPanel();
@@ -472,7 +709,7 @@ public class TrangChinh extends javax.swing.JFrame {
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
                         .addGap(147, 147, 147)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
         panelLeft_TopLayout.setVerticalGroup(
             panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -542,6 +779,14 @@ public class TrangChinh extends javax.swing.JFrame {
             }
         });
 
+        btnOrderMon.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnOrderMon.setText("Đặt món");
+        btnOrderMon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOrderMonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -555,7 +800,8 @@ public class TrangChinh extends javax.swing.JFrame {
                         .addComponent(btnTamTinh)
                         .addGap(18, 18, 18)
                         .addComponent(btnThanhToan)
-                        .addGap(114, 114, 114))
+                        .addGap(18, 18, 18)
+                        .addComponent(btnOrderMon, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel14)
@@ -568,8 +814,8 @@ public class TrangChinh extends javax.swing.JFrame {
                             .addComponent(txtTongBill)
                             .addComponent(txtGiamBill)
                             .addComponent(txtTongTienPhaiTra, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
-                        .addGap(32, 32, 32)
-                        .addComponent(btnApSDT)))
+                        .addGap(18, 18, 18)
+                        .addComponent(btnApSDT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(18, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -596,7 +842,8 @@ public class TrangChinh extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnTamTinh)
                     .addComponent(btnThanhToan)
-                    .addComponent(btnXuatBill))
+                    .addComponent(btnXuatBill)
+                    .addComponent(btnOrderMon))
                 .addContainerGap())
         );
 
@@ -1141,16 +1388,37 @@ public class TrangChinh extends javax.swing.JFrame {
             // Thêm ActionListener cho checkbox
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
-                    selectedCheckOrder.add(checkBox);
-                    ArrayMonAn.add(mon);
-                    LoadTableOrder();
-                    checkBox.setBackground(Color.GREEN);
-                } else {
-                    ArrayMonAn.remove(mon);
+                    if (idBanAnTrangChu == 0) {
+                        // Hiển thị thông báo popup khi không chọn bàn
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                        checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                    } else {
+                        if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                            // Kiểm tra xem ô kiểm đã tồn tại trong danh sách chưa
+                            if (!isCheckBoxDuplicate(checkBox)) {
+                                // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
+                                selectedCheckOrder.add(checkBox);
+                                ArrayMonAn.add(mon);
+                                LoadTableOrder();
+                                checkBox.setBackground(Color.GREEN);
+                                UpdateGiaTienTXT();
+                            } else {
 
-                    selectedCheckOrder.remove(checkBox);
-                    LoadTableOrder();
-                    checkBox.setBackground(null);
+                                // Nếu đã tồn tại, hiển thị thông báo đã có
+                                JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                                checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                            }
+                        }
+
+                    }
+                } else {
+                    if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                        ArrayMonAn.remove(mon);
+                        selectedCheckOrder.remove(checkBox);
+                        LoadTableOrder();
+                        checkBox.setBackground(null);
+                        UpdateGiaTienTXT();
+                    }
                 }
             });
 
@@ -1216,16 +1484,37 @@ public class TrangChinh extends javax.swing.JFrame {
                 // Thêm ActionListener cho checkbox
                 checkBox.addActionListener(e -> {
                     if (checkBox.isSelected()) {
-                        selectedCheckOrder.add(checkBox);
-                        ArrayMonAn.add(mon);
-                        LoadTableOrder();
-                        checkBox.setBackground(Color.GREEN);
-                    } else {
-                        ArrayMonAn.remove(mon);
+                        if (idBanAnTrangChu == 0) {
+                            // Hiển thị thông báo popup khi không chọn bàn
+                            JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                            checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                        } else {
+                            if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                                // Kiểm tra xem ô kiểm đã tồn tại trong danh sách chưa
+                                if (!isCheckBoxDuplicate(checkBox)) {
+                                    // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
+                                    selectedCheckOrder.add(checkBox);
+                                    ArrayMonAn.add(mon);
+                                    LoadTableOrder();
+                                    checkBox.setBackground(Color.GREEN);
+                                    UpdateGiaTienTXT();
+                                } else {
 
-                        selectedCheckOrder.remove(checkBox);
-                        LoadTableOrder();
-                        checkBox.setBackground(null);
+                                    // Nếu đã tồn tại, hiển thị thông báo đã có
+                                    JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                                    checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                                }
+                            }
+
+                        }
+                    } else {
+                        if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                            ArrayMonAn.remove(mon);
+                            selectedCheckOrder.remove(checkBox);
+                            LoadTableOrder();
+                            checkBox.setBackground(null);
+                            UpdateGiaTienTXT();
+                        }
                     }
                 });
 
@@ -1244,13 +1533,13 @@ public class TrangChinh extends javax.swing.JFrame {
         String tenthucuong = txtThucUong.getText();
         Order_Load timkiem = new Order_Load();
         ArrayList<MonAn> listthucuong = timkiem.TimKiemThucUong(tenthucuong);
-        // Xóa các mục hiện tại trên giao diện
+    
         panelThucUong.removeAll();
-        // Hiển thị kết quả tìm kiếm mới
+  
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
+        gbc.insets = new Insets(10, 10, 10, 10); 
         for (int i = 0; i < listthucuong.size(); i++) {
             MonAn mon = listthucuong.get(i);
             String hinhanh = mon.getHinhanh();
@@ -1268,19 +1557,34 @@ public class TrangChinh extends javax.swing.JFrame {
                 gbc.gridx = 0;
                 gbc.gridy++;
             }
-            // Thêm ActionListener cho checkbox
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
-                    selectedCheckOrder.add(checkBox);
-                    ArrayMonAn.add(mon);
-                    LoadTableOrder();
-                    checkBox.setBackground(Color.GREEN);
+                    if (idBanAnTrangChu == 0) {
+ 
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                        checkBox.setSelected(false); // Bỏ chọn ô kiểm
+                    } else {
+                        if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                            if (!isCheckBoxDuplicate(checkBox)) {
+                                selectedCheckOrder.add(checkBox);
+                                ArrayMonAn.add(mon);
+                                LoadTableOrder();
+                                checkBox.setBackground(Color.GREEN);
+                                UpdateGiaTienTXT();
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                                checkBox.setSelected(false); 
+                            }
+                        }
+                    }
                 } else {
-                    ArrayMonAn.remove(mon);
-
-                    selectedCheckOrder.remove(checkBox);
-                    LoadTableOrder();
-                    checkBox.setBackground(null);
+                    if (!KiemTraBanTrong(idBanAnTrangChu)) {
+                        ArrayMonAn.remove(mon);
+                        selectedCheckOrder.remove(checkBox);
+                        LoadTableOrder();
+                        checkBox.setBackground(null);
+                        UpdateGiaTienTXT();
+                    }
                 }
             });
 
@@ -1303,6 +1607,82 @@ public class TrangChinh extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnThanhToanActionPerformed
 
+    private void btnOrderMonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrderMonActionPerformed
+
+        // Kiểm tra xem idBan có hợp lệ không
+        if (idBanAnTrangChu == 0) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn bàn để đặt món.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return; // Dừng hàm nếu idBan không hợp lệ
+        }
+        // Kiểm tra xem bàn có người không
+        if (KiemTraBanTrong(idBanAnTrangChu)) {
+            JOptionPane.showMessageDialog(this, "Bàn đã có người, không thể đặt món.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return; // Dừng hàm nếu bàn đã có người
+        }
+        // Kiểm tra xem tableOrder có dữ liệu không
+        if (tableOrder.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "Chưa thêm món ăn vào bảng.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return; // Dừng hàm nếu tableOrder trống
+        }
+
+        Order_XuLy add = new Order_XuLy();
+        int idban = idBanAnTrangChu;
+        // float giagiam = Float.parseFloat(txtGiamBill.getText());
+        float tongbill_onlyMon = Float.parseFloat(txtTongBill.getText());
+        float thanhtoan = Float.parseFloat(txtTongTienPhaiTra.getText());
+        String trangthai = "unsuccessful";
+
+        Order item1 = new Order();
+        item1.setId_ban(idban);
+        //item1.setGiamgia(giagiam);
+        item1.setTongbill(tongbill_onlyMon);
+        item1.setTrangthai(trangthai);
+        item1.setThanhtien((float) thanhtoan);
+
+        boolean themOrder = add.InsertOrder(item1);
+        int order_id = add.GetIdOrder();
+        boolean themOrder_detail = false;
+
+        Date currentDate = new Date();
+        boolean update = add.UpDateTrangThaiBan(idban, currentDate);
+    
+        int rowCount = tableOrder.getRowCount();
+        ArrayList<Order_Detail> listAddMonAn = new ArrayList<>();
+
+        if (rowCount > 0) {
+            for (int i = 0; i < rowCount; i++) {
+                Order_Detail item = new Order_Detail();
+
+                Object idMonan = tableOrder.getValueAt(i, 0); 
+                Object tenMonan = tableOrder.getValueAt(i, 1); 
+                Object soLuong = tableOrder.getValueAt(i, 2); 
+                Object dongia = tableOrder.getValueAt(i, 3);
+                // Gán dữ liệu cho đối tượng MonAn
+                item.setOrderId(order_id);
+                item.setIdMonan((int) idMonan);
+                item.setTenMonan((String) tenMonan);
+                item.setSoLuong((int) soLuong);
+                item.setDonGia((int) dongia);
+                double thanhtien = (int) soLuong * (int) dongia;
+                item.setThanhTien(thanhtien);
+                listAddMonAn.add(item);
+            }
+            for (Order_Detail itemDT : listAddMonAn) {
+                if (add.InsertOrderDetail(itemDT)) {
+                    themOrder_detail = true;
+                } else {
+                    themOrder_detail = false;
+                }
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Chưa thêm món ăn vào bảng.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+        }
+        if (themOrder && themOrder_detail && update) {
+            JOptionPane.showMessageDialog(this, "Đặt món thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_btnOrderMonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1320,13 +1700,17 @@ public class TrangChinh extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TrangChinh.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(TrangChinh.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TrangChinh.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(TrangChinh.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TrangChinh.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(TrangChinh.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TrangChinh.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(TrangChinh.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         /* Create and display the form */
@@ -1340,6 +1724,7 @@ public class TrangChinh extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnApSDT;
     private javax.swing.JButton btnLoc;
+    private javax.swing.JButton btnOrderMon;
     private javax.swing.JButton btnTamTinh;
     private javax.swing.JButton btnThanhToan;
     private javax.swing.JButton btnTim;
