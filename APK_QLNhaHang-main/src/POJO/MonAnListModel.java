@@ -13,9 +13,9 @@ import javax.swing.AbstractListModel;
  */
 public class MonAnListModel extends AbstractListModel<String> {
 
-    private ArrayList<MonAn> monAnList;
+    private ArrayList<MonAn_Temp> monAnList;
 
-    public MonAnListModel(ArrayList<MonAn> monAnList) {
+    public MonAnListModel(ArrayList<MonAn_Temp> monAnList) {
         this.monAnList = monAnList;
     }
 
@@ -26,7 +26,7 @@ public class MonAnListModel extends AbstractListModel<String> {
 
     @Override
     public String getElementAt(int index) {
-        MonAn monAn = monAnList.get(index);
+        MonAn_Temp monAn = monAnList.get(index);
         return "ID: " + monAn.getId() + ", Tên món: " + monAn.getTenmon() + ", Giá món: " + monAn.getGiamon();
     }
 }

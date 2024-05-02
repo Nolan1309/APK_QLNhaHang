@@ -138,16 +138,16 @@ public class Order_XuLy {
 
     public static boolean InsertOrder(Order item) {
         try {
-            String sql = "insert into DonHang(id_ban  , tongtien ,trang_thai_thanhtoan,TongBill)values(?,?,?,?)";
+            String sql = "insert into DonHang(id_ban , gia_giam, tongtien ,trang_thai_thanhtoan,TongBill)values(?,?,?,?,?)";
             Connect provider = new Connect();
 
             Connection connection = provider.ketNoiCSDL();
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, item.getId_ban());
-//            statement.setFloat(2, item.getGiamgia());
-            statement.setFloat(2, item.getTongbill());
-            statement.setString(3, item.getTrangthai());
-            statement.setFloat(4, item.getThanhtien());
+            statement.setFloat(2, item.getGiamgia());
+            statement.setFloat(3, item.getTongbill());
+            statement.setString(4, item.getTrangthai());
+            statement.setFloat(5, item.getThanhtien());
 
             int rowsAffected = statement.executeUpdate(); // Thực thi câu lệnh INSERT
 
@@ -163,13 +163,13 @@ public class Order_XuLy {
 
     public static int GetIdOrder() {
         try {
-            String query = "SELECT SCOPE_IDENTITY()";
+            String query = "SELECT MAX(order_id) AS MaxID FROM DonHang;";
             Connect provider = new Connect();
             provider.ketNoiCSDL();
             ResultSet rs = provider.executeQuery(query);
             int orderId = 0;
             if (rs.next()) {
-                orderId = rs.getInt(1);
+                orderId = rs.getInt("MaxID");
             }
             provider.close();
             return orderId;
@@ -207,7 +207,7 @@ public class Order_XuLy {
 
     public static Boolean UpDateTrangThaiBan(int idBan, Date time) {
         try {
-            String sql = "update Ban set ngay_dat = '?' , trang_thai = N'Có người' where id_ban = ?";
+            String sql = "update Ban set ngay_dat = ? , trang_thai = N'Có người' where id_ban = ?";
             Connect provider = new Connect();
 
             Connection connection = provider.ketNoiCSDL();

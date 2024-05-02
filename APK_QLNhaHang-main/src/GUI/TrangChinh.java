@@ -40,6 +40,7 @@ import POJO.BanAn;
 import POJO.DanhMucMonAn;
 import POJO.MonAn;
 import POJO.MonAnListModel;
+import POJO.MonAn_Temp;
 import POJO.NguyenLieu;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -81,7 +82,7 @@ public class TrangChinh extends javax.swing.JFrame {
     public int idBanAnTrangChu_OLD = -1;
     public ArrayList<Order> CheckTinhTrang = new ArrayList<>();
     private ArrayList<JCheckBox> selectedCheckOrder = new ArrayList<>(); //Dùng để thêm vào table 
-    private ArrayList<MonAn> ArrayMonAn = new ArrayList<>(); //Song song với checkbox , dùng để gom dữ liệu đem đi order
+    private ArrayList<MonAn_Temp> ArrayMonAn = new ArrayList<>(); //Song song với checkbox , dùng để gom dữ liệu đem đi order
     DefaultTableModel tableModel = new DefaultTableModel();
 
     /**
@@ -310,6 +311,7 @@ public class TrangChinh extends javax.swing.JFrame {
         gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
 
         for (int i = 0; i < listmon.size(); i++) {
+
             MonAn mon = listmon.get(i);
             int idMon = mon.getId();
             String hinhanh = mon.getHinhanh();
@@ -321,6 +323,13 @@ public class TrangChinh extends javax.swing.JFrame {
             JCheckBox checkBox = new JCheckBox("<html>Món " + tenmon + "<br>(" + giaca + ")</html>", scaledIcon);
             checkBox.setPreferredSize(new Dimension(150, 100));
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+
+            MonAn_Temp mon_tmp = new MonAn_Temp();
+
+            mon_tmp.setId(idMon);
+            mon_tmp.setTenmon(tenmon);
+            mon_tmp.setSoluong(1);
+            mon_tmp.setGiamon(giaca);
 
             panelThucDon.add(checkBox, gbc);
 
@@ -344,7 +353,7 @@ public class TrangChinh extends javax.swing.JFrame {
                             if (!isCheckBoxDuplicate(checkBox)) {
                                 // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
                                 selectedCheckOrder.add(checkBox);
-                                ArrayMonAn.add(mon);
+                                ArrayMonAn.add(mon_tmp);
                                 LoadTableOrder();
                                 checkBox.setBackground(Color.GREEN);
                                 UpdateGiaTienTXT();
@@ -359,7 +368,7 @@ public class TrangChinh extends javax.swing.JFrame {
                     }
                 } else {
                     if (!KiemTraBanTrong(idBanAnTrangChu)) {
-                        ArrayMonAn.remove(mon);
+                        ArrayMonAn.remove(mon_tmp);
                         selectedCheckOrder.remove(checkBox);
                         LoadTableOrder();
                         checkBox.setBackground(null);
@@ -394,6 +403,7 @@ public class TrangChinh extends javax.swing.JFrame {
 
         for (int i = 0; i < listmon.size(); i++) {
             MonAn mon = listmon.get(i);
+            int idMon = mon.getId();
             String hinhanh = mon.getHinhanh();
             String tenmon = mon.getTenmon();
             String giaca = mon.getGiamon();
@@ -405,6 +415,13 @@ public class TrangChinh extends javax.swing.JFrame {
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
 
             panelThucUong.add(checkBox, gbc);
+
+            MonAn_Temp mon_tmp = new MonAn_Temp();
+
+            mon_tmp.setId(idMon);
+            mon_tmp.setTenmon(tenmon);
+            mon_tmp.setSoluong(1);
+            mon_tmp.setGiamon(giaca);
 
             gbc.gridx++;
             if (gbc.gridx >= 3) {
@@ -426,7 +443,7 @@ public class TrangChinh extends javax.swing.JFrame {
                             if (!isCheckBoxDuplicate(checkBox)) {
                                 // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
                                 selectedCheckOrder.add(checkBox);
-                                ArrayMonAn.add(mon);
+                                ArrayMonAn.add(mon_tmp);
                                 LoadTableOrder();
                                 checkBox.setBackground(Color.GREEN);
                                 UpdateGiaTienTXT();
@@ -442,7 +459,7 @@ public class TrangChinh extends javax.swing.JFrame {
                     }
                 } else {
                     if (!KiemTraBanTrong(idBanAnTrangChu)) {
-                        ArrayMonAn.remove(mon);
+                        ArrayMonAn.remove(mon_tmp);
                         selectedCheckOrder.remove(checkBox);
                         LoadTableOrder();
                         checkBox.setBackground(null);
@@ -462,13 +479,12 @@ public class TrangChinh extends javax.swing.JFrame {
 
         // Xóa sạch dữ liệu của danh sách danhsachorder
         tableOrder.removeAll();
-        ArrayList<MonAn> danhsachorder = getArrayList();
+        ArrayList<MonAn_Temp> danhsachorder = getArrayList();
 
-        MonAnListModel listModel = new MonAnListModel(danhsachorder);
-
+//        MonAnListModel listModel = new MonAnListModel(danhsachorder);
         // Thêm dữ liệu từ danh sách món ăn vào DefaultTableModel
-        for (MonAn monAn : danhsachorder) {
-            Object[] row = {monAn.getId(), monAn.getTenmon(), 1, monAn.getGiamon()};
+        for (MonAn_Temp monAn : danhsachorder) {
+            Object[] row = {monAn.getId(), monAn.getTenmon(), monAn.getSoluong(), monAn.getGiamon()};
             tableModel.addRow(row);
         }
         // Gán renderer cho ô chứa panel
@@ -481,9 +497,11 @@ public class TrangChinh extends javax.swing.JFrame {
                 int column = e.getColumn();
                 if (column == 2) { // Check if quantity column is updated
                     int newValue = (int) tableModel.getValueAt(row, column);
-                    danhsachorder.get(row).s(newValue); 
+                    danhsachorder.get(row).setSoluong(newValue);
+                    UpdateGiaTienTXT();
                 }
             }
+
         });
 
     }
@@ -493,7 +511,7 @@ public class TrangChinh extends javax.swing.JFrame {
         return selectedCheckOrder;
     }
 
-    public ArrayList<MonAn> getArrayList() {
+    public ArrayList<MonAn_Temp> getArrayList() {
         return ArrayMonAn;
     }
 
@@ -1369,6 +1387,7 @@ public class TrangChinh extends javax.swing.JFrame {
         gbc.insets = new Insets(10, 10, 10, 10); // Thiết lập margin giữa các phần tử
         for (int i = 0; i < list.size(); i++) {
             MonAn mon = list.get(i);
+            int idMon = mon.getId();
             String hinhanh = mon.getHinhanh();
             String tenmon = mon.getTenmon();
             String giaca = mon.getGiamon();
@@ -1379,6 +1398,14 @@ public class TrangChinh extends javax.swing.JFrame {
             checkBox.setPreferredSize(new Dimension(150, 100));
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
             panelThucDon.add(checkBox, gbc);
+
+            MonAn_Temp mon_tmp = new MonAn_Temp();
+
+            mon_tmp.setId(idMon);
+            mon_tmp.setTenmon(tenmon);
+            mon_tmp.setSoluong(1);
+            mon_tmp.setGiamon(giaca);
+
             gbc.gridx++;
             if (gbc.gridx >= 5) {
                 gbc.gridx = 0;
@@ -1398,7 +1425,7 @@ public class TrangChinh extends javax.swing.JFrame {
                             if (!isCheckBoxDuplicate(checkBox)) {
                                 // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
                                 selectedCheckOrder.add(checkBox);
-                                ArrayMonAn.add(mon);
+                                ArrayMonAn.add(mon_tmp);
                                 LoadTableOrder();
                                 checkBox.setBackground(Color.GREEN);
                                 UpdateGiaTienTXT();
@@ -1413,7 +1440,7 @@ public class TrangChinh extends javax.swing.JFrame {
                     }
                 } else {
                     if (!KiemTraBanTrong(idBanAnTrangChu)) {
-                        ArrayMonAn.remove(mon);
+                        ArrayMonAn.remove(mon_tmp);
                         selectedCheckOrder.remove(checkBox);
                         LoadTableOrder();
                         checkBox.setBackground(null);
@@ -1465,6 +1492,7 @@ public class TrangChinh extends javax.swing.JFrame {
 
             for (int i = 0; i < listMonAn.size(); i++) {
                 MonAn mon = listMonAn.get(i);
+                int idMon = mon.getId();
                 String hinhanh = mon.getHinhanh();
                 String tenmon = mon.getTenmon();
                 String giaca = mon.getGiamon();
@@ -1475,6 +1503,14 @@ public class TrangChinh extends javax.swing.JFrame {
                 checkBox.setPreferredSize(new Dimension(150, 100));
                 checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
                 panelThucDon.add(checkBox, gbc);
+
+                MonAn_Temp mon_tmp = new MonAn_Temp();
+
+                mon_tmp.setId(idMon);
+                mon_tmp.setTenmon(tenmon);
+                mon_tmp.setSoluong(1);
+                mon_tmp.setGiamon(giaca);
+
                 gbc.gridx++;
                 if (gbc.gridx >= 5) {
                     gbc.gridx = 0;
@@ -1494,7 +1530,7 @@ public class TrangChinh extends javax.swing.JFrame {
                                 if (!isCheckBoxDuplicate(checkBox)) {
                                     // Nếu chưa tồn tại, thêm ô kiểm vào danh sách và thêm món
                                     selectedCheckOrder.add(checkBox);
-                                    ArrayMonAn.add(mon);
+                                    ArrayMonAn.add(mon_tmp);
                                     LoadTableOrder();
                                     checkBox.setBackground(Color.GREEN);
                                     UpdateGiaTienTXT();
@@ -1509,7 +1545,7 @@ public class TrangChinh extends javax.swing.JFrame {
                         }
                     } else {
                         if (!KiemTraBanTrong(idBanAnTrangChu)) {
-                            ArrayMonAn.remove(mon);
+                            ArrayMonAn.remove(mon_tmp);
                             selectedCheckOrder.remove(checkBox);
                             LoadTableOrder();
                             checkBox.setBackground(null);
@@ -1533,15 +1569,16 @@ public class TrangChinh extends javax.swing.JFrame {
         String tenthucuong = txtThucUong.getText();
         Order_Load timkiem = new Order_Load();
         ArrayList<MonAn> listthucuong = timkiem.TimKiemThucUong(tenthucuong);
-    
+
         panelThucUong.removeAll();
-  
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(10, 10, 10, 10); 
+        gbc.insets = new Insets(10, 10, 10, 10);
         for (int i = 0; i < listthucuong.size(); i++) {
             MonAn mon = listthucuong.get(i);
+            int idMon = mon.getId();
             String hinhanh = mon.getHinhanh();
             String tenmon = mon.getTenmon();
             String giaca = mon.getGiamon();
@@ -1552,6 +1589,14 @@ public class TrangChinh extends javax.swing.JFrame {
             checkBox.setPreferredSize(new Dimension(150, 100));
             checkBox.setHorizontalTextPosition(SwingConstants.RIGHT);
             panelThucUong.add(checkBox, gbc);
+
+            MonAn_Temp mon_tmp = new MonAn_Temp();
+
+            mon_tmp.setId(idMon);
+            mon_tmp.setTenmon(tenmon);
+            mon_tmp.setSoluong(1);
+            mon_tmp.setGiamon(giaca);
+
             gbc.gridx++;
             if (gbc.gridx >= 3) {
                 gbc.gridx = 0;
@@ -1560,26 +1605,26 @@ public class TrangChinh extends javax.swing.JFrame {
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
                     if (idBanAnTrangChu == 0) {
- 
+
                         JOptionPane.showMessageDialog(null, "Vui lòng chọn bàn trước khi thêm món vào", "Thông báo", JOptionPane.WARNING_MESSAGE);
                         checkBox.setSelected(false); // Bỏ chọn ô kiểm
                     } else {
                         if (!KiemTraBanTrong(idBanAnTrangChu)) {
                             if (!isCheckBoxDuplicate(checkBox)) {
                                 selectedCheckOrder.add(checkBox);
-                                ArrayMonAn.add(mon);
+                                ArrayMonAn.add(mon_tmp);
                                 LoadTableOrder();
                                 checkBox.setBackground(Color.GREEN);
                                 UpdateGiaTienTXT();
                             } else {
                                 JOptionPane.showMessageDialog(null, "Món đã được chọn", "Thông báo", JOptionPane.WARNING_MESSAGE);
-                                checkBox.setSelected(false); 
+                                checkBox.setSelected(false);
                             }
                         }
                     }
                 } else {
                     if (!KiemTraBanTrong(idBanAnTrangChu)) {
-                        ArrayMonAn.remove(mon);
+                        ArrayMonAn.remove(mon_tmp);
                         selectedCheckOrder.remove(checkBox);
                         LoadTableOrder();
                         checkBox.setBackground(null);
@@ -1634,18 +1679,19 @@ public class TrangChinh extends javax.swing.JFrame {
 
         Order item1 = new Order();
         item1.setId_ban(idban);
-        //item1.setGiamgia(giagiam);
+        item1.setGiamgia(0);
         item1.setTongbill(tongbill_onlyMon);
         item1.setTrangthai(trangthai);
         item1.setThanhtien((float) thanhtoan);
 
         boolean themOrder = add.InsertOrder(item1);
         int order_id = add.GetIdOrder();
+        System.out.println("ID : "+order_id);
         boolean themOrder_detail = false;
 
         Date currentDate = new Date();
         boolean update = add.UpDateTrangThaiBan(idban, currentDate);
-    
+
         int rowCount = tableOrder.getRowCount();
         ArrayList<Order_Detail> listAddMonAn = new ArrayList<>();
 
@@ -1653,17 +1699,21 @@ public class TrangChinh extends javax.swing.JFrame {
             for (int i = 0; i < rowCount; i++) {
                 Order_Detail item = new Order_Detail();
 
-                Object idMonan = tableOrder.getValueAt(i, 0); 
-                Object tenMonan = tableOrder.getValueAt(i, 1); 
-                Object soLuong = tableOrder.getValueAt(i, 2); 
+                Object idMonan = tableOrder.getValueAt(i, 0);
+                Object tenMonan = tableOrder.getValueAt(i, 1);
+                Object soLuong = tableOrder.getValueAt(i, 2);
                 Object dongia = tableOrder.getValueAt(i, 3);
                 // Gán dữ liệu cho đối tượng MonAn
                 item.setOrderId(order_id);
                 item.setIdMonan((int) idMonan);
                 item.setTenMonan((String) tenMonan);
-                item.setSoLuong((int) soLuong);
-                item.setDonGia((int) dongia);
-                double thanhtien = (int) soLuong * (int) dongia;
+
+                int soLuongInt = Integer.parseInt(soLuong.toString());
+                double dongiaitem = Double.parseDouble(dongia.toString());
+
+                item.setSoLuong(soLuongInt);
+                item.setDonGia(dongiaitem);
+                double thanhtien = soLuongInt * dongiaitem;
                 item.setThanhTien(thanhtien);
                 listAddMonAn.add(item);
             }

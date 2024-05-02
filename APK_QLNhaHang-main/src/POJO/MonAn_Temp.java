@@ -86,4 +86,10 @@ public class MonAn_Temp {
         this.hinhanh = hinhanh;
         this.soluong = soluong;
     }
+
+    @Override
+    public String toString() {
+        return "MonAn_Temp{"+ "id=" + id + ", tenmon='" + tenmon + '\''+ ", giamon='" + giamon + '\''+ ", soluong=" + soluong + '}';
+    }
+
 }
