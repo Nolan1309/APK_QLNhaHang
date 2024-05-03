@@ -38,35 +38,7 @@ public class TinhLuong extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    
-//    // Tạo một JLabel để hiển thị thông tin các checkbox đã chọn
-//    JLabel selectedCheckBoxLabel = new JLabel("CheckBox đã chọn: ");
-//
-//    // Tạo ActionListener cho từng checkbox
-//    ActionListener actionListener = new ActionListener() {
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            StringBuilder selectedCheckBoxes = new StringBuilder();
-//            if (checkBox1.isSelected()) {
-//                selectedCheckBoxes.append(checkBox1.getText()).append(", ");
-//            }
-//            if (checkBox2.isSelected()) {
-//                selectedCheckBoxes.append(checkBox2.getText()).append(", ");
-//            }
-//            String selectedText = selectedCheckBoxes.toString();
-//            // Loại bỏ dấu phẩy và khoảng trắng cuối cùng nếu có
-//            if (!selectedText.isEmpty()) {
-//                selectedText = selectedText.substring(0, selectedText.length() - 2);
-//            }
-//            selectedCheckBoxLabel.setText("CheckBox đã chọn: " + selectedText);
-//        }
-//    };
-//
-//    // Đăng ký ActionListener cho các checkbox
-//    checkBox1.addActionListener(actionListener);
-//    checkBox2.addActionListener(actionListener);
-    // Thêm JLabel vào panel
-//    panelThucDon.add(selectedCheckBoxLabel);
+  
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -318,6 +290,14 @@ public class TinhLuong extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(TinhLuong.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
