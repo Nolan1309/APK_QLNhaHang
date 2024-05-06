@@ -30,20 +30,43 @@ public class TinhLuongDAO
             
             tl.setMaLuong(rs.getInt("MaLuong"));
             tl.setStaff_id(rs.getInt("staff_id"));
-    
+            
             // Chuyển đổi giá trị từ Time của SQL thành LocalTime
             Time SoGioLamSQL = rs.getTime("SoGioLam");
-        
-            LocalTime TongSoGio = SoGioLamSQL.toLocalTime();
-  
+
+            LocalTime TongSoGio;
+            if (SoGioLamSQL != null) {
+                TongSoGio = SoGioLamSQL.toLocalTime();
+            } else {
+                TongSoGio = null; // Gán giá trị null nếu SoGioLamSQL là null
+            }
+
             // Tạo đối tượng Time mới từ LocalTime
-            Time tongSoGioTime = Time.valueOf(TongSoGio);
-           
+            Time tongSoGioTime;
+            if (TongSoGio != null) {
+                tongSoGioTime = Time.valueOf(TongSoGio);
+            } else {
+                tongSoGioTime = Time.valueOf("00:00:00"); // Gán giá trị null nếu TongSoGio là null
+            }
+
             // Đặt giá trị cho thuộc tính giờ làm của đối tượng LichLamNV
             tl.setSoGioLam(tongSoGioTime);
+
+    
+//            // Chuyển đổi giá trị từ Time của SQL thành LocalTime
+//            Time SoGioLamSQL = rs.getTime("SoGioLam");
+//        
+//            LocalTime TongSoGio = SoGioLamSQL.toLocalTime();
+//  
+//            // Tạo đối tượng Time mới từ LocalTime
+//            Time tongSoGioTime = Time.valueOf(TongSoGio);
+//           
+//            // Đặt giá trị cho thuộc tính giờ làm của đối tượng LichLamNV
+//            tl.setSoGioLam(tongSoGioTime);
            
             tl.setLuongCoBan(rs.getDouble("LuongCoBan"));
             tl.setTongLuong(rs.getDouble("TongLuong"));
+            
    
             dsTL.add(tl);
         }
@@ -62,7 +85,8 @@ public class TinhLuongDAO
 
    
 
-    String sql = String.format("INSERT INTO TinhLuong(staff_id, SoGioLam, LuongCoBan, TongLuong) VALUES (%d, '%s', '%f', '%f')", tl.getStaff_id(), gioFormatted, tl.getLuongCoBan(), tl.getTongLuong());
+    String sql = String.format("INSERT INTO TinhLuong(staff_id, SoGioLam, LuongCoBan, TongLuong) VALUES (%d, '%s', %f, %f)", tl.getStaff_id(), gioFormatted, tl.getLuongCoBan(), tl.getTongLuong());
+
     SQLServerDataProvider provider = new SQLServerDataProvider();
     
     try {
@@ -125,5 +149,19 @@ public class TinhLuongDAO
         
          return kq;
     }
+  
     
+    public static boolean tinhLuong(int staff_id) {
+        String sql = String.format("EXEC TinhLuongNV %d", staff_id);
+        SQLServerDataProvider provider = new SQLServerDataProvider();
+
+        provider.open();
+        int result = provider.executeUpdate(sql);
+        provider.close();
+
+        return result > 0;
+    }
 }
+   
+    
+

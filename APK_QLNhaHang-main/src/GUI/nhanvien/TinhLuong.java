@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import java.time.format.DateTimeParseException;
 /**
  *
  * @author Admin
@@ -76,7 +77,6 @@ public class TinhLuong extends javax.swing.JFrame {
         txtLuongCB = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtTongGio = new javax.swing.JTextField();
-        btnTongGio = new javax.swing.JButton();
         btnTongLuong = new javax.swing.JButton();
         jLabel10 = new javax.swing.JLabel();
         txtTongLuong = new javax.swing.JTextField();
@@ -110,11 +110,13 @@ public class TinhLuong extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
         jLabel8.setText("Tổng giờ:");
 
-        btnTongGio.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        btnTongGio.setText("Tổng giờ");
-
         btnTongLuong.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        btnTongLuong.setText("Tổng lương");
+        btnTongLuong.setText("Tổng giờ và lương");
+        btnTongLuong.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTongLuongActionPerformed(evt);
+            }
+        });
 
         jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
         jLabel10.setText("Tổng lương:");
@@ -134,9 +136,9 @@ public class TinhLuong extends javax.swing.JFrame {
                     .addComponent(txtMaLuong, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
                     .addComponent(txtMaNhanVien)
                     .addComponent(txtLuongCB))
-                .addGap(18, 18, 18)
-                .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
+                        .addGap(29, 29, 29)
                         .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel10)
                             .addComponent(jLabel8))
@@ -145,10 +147,9 @@ public class TinhLuong extends javax.swing.JFrame {
                             .addComponent(txtTongGio, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtTongLuong, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
-                        .addComponent(btnTongGio, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
-                        .addComponent(btnTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(65, 65, 65)
+                        .addComponent(btnTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(58, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLeft_TopLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -174,7 +175,6 @@ public class TinhLuong extends javax.swing.JFrame {
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
                     .addComponent(txtLuongCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnTongGio)
                     .addComponent(btnTongLuong))
                 .addGap(0, 9, Short.MAX_VALUE))
         );
@@ -344,39 +344,98 @@ public class TinhLuong extends javax.swing.JFrame {
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
         // TODO add your handling code here:
-        int manv = Integer.parseInt(txtMaNhanVien.getText());
+//        int manv = Integer.parseInt(txtMaNhanVien.getText());
+//
+//        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
+//        
+//        // Kiểm tra xem chuỗi có rỗng không
+//        if (gioStr.isEmpty()) {
+//        gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
+//
+//        // Chuyển đổi chuỗi thành đối tượng LocalTime
+//        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
+//      
+//        // Chuyển đổi LocalTime thành java.sql.Time
+//        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
+//        
+//        double Lcb = Double.parseDouble(txtLuongCB.getText());
+//        double Tl = Double.parseDouble(txtTongLuong.getText());
+//        
+//        TinhLuongNV tl = new TinhLuongNV();
+//        tl.setStaff_id(manv);
+//        tl.setSoGioLam(gio);
+//        tl.setLuongCoBan(Lcb);
+//        tl.setTongLuong(Tl);
+//        
+//        TinhLuongDAO.ThemLuong(tl);
+//        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+//
+//        JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        
+            int manv = Integer.parseInt(txtMaNhanVien.getText());
 
-        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
-        
+           String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
 
-        // Chuyển đổi chuỗi thành đối tượng LocalTime
-        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
-      
-        // Chuyển đổi LocalTime thành java.sql.Time
-        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
-        
-        double Lcb = Double.parseDouble(txtLuongCB.getText());
-        double Tl = Double.parseDouble(txtTongLuong.getText());
-        
-        TinhLuongNV tl = new TinhLuongNV();
-        tl.setStaff_id(manv);
-        tl.setSoGioLam(gio);
-        tl.setLuongCoBan(Lcb);
-        tl.setTongLuong(Tl);
-        
-        TinhLuongDAO.ThemLuong(tl);
-        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+            // Kiểm tra xem chuỗi có rỗng không
+            if (gioStr.isEmpty()) {
+                gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
+}
 
-        JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            // Chuyển đổi chuỗi thành đối tượng LocalTime
+            LocalTime gioLocal;
+            try {
+                gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
+            } catch (DateTimeParseException e) {
+                // Xử lý ngoại lệ khi chuỗi không đúng định dạng
+                // Ví dụ: thông báo cho người dùng nhập lại giờ đúng định dạng
+                JOptionPane.showMessageDialog(this, "Định dạng giờ không hợp lệ. Vui lòng nhập lại theo định dạng HH:mm:ss", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return; // Dừng thực hiện phương thức nếu có lỗi
+            }
+
+            // Chuyển đổi LocalTime thành java.sql.Time
+            java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
+
+            
+            double Lcb = Double.parseDouble(txtLuongCB.getText());
+            //double Tl = Double.parseDouble(txtTongLuong.getText());
+            double Tl;
+            String luongStr = txtTongLuong.getText();
+            if (!luongStr.isEmpty()) {
+                Tl = Double.parseDouble(luongStr);
+            } else {
+                Tl = 1.0; // hoặc bất kỳ giá trị mặc định nào phù hợp
+            }
+            
+            
+
+            TinhLuongNV tl = new TinhLuongNV();
+            tl.setStaff_id(manv);
+            tl.setSoGioLam(gio);
+            tl.setLuongCoBan(Lcb);
+            tl.setTongLuong(Tl);
+
+            TinhLuongDAO.ThemLuong(tl);
+            taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+
+            JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        
     }//GEN-LAST:event_btnThemActionPerformed
 
+    
+    
     private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
         // TODO add your handling code here:
         int maLuong = Integer.parseInt(txtMaLuong.getText());
         int manv = Integer.parseInt(txtMaNhanVien.getText());
 
+//        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
         String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
-        
+
+        // Kiểm tra xem chuỗi có rỗng không
+        if (gioStr.isEmpty()) {
+            gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
+        }
+
 
         // Chuyển đổi chuỗi thành đối tượng LocalTime
         LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -393,8 +452,8 @@ public class TinhLuong extends javax.swing.JFrame {
         tl.setLuongCoBan(Lcb);
         tl.setTongLuong(Tl);
         
-         // Khởi tạo đối tượng luong với các giá trị mới
-         TinhLuongNV TL = new TinhLuongNV(maLuong, manv, gio, Lcb, Tl);
+        // Khởi tạo đối tượng luong với các giá trị mới
+        TinhLuongNV TL = new TinhLuongNV(maLuong, manv, gio, Lcb, Tl);
 
         // Gọi phương thức SuaLuong với đối tượng luong đã được thiết lập giá trị
         
@@ -436,10 +495,26 @@ public class TinhLuong extends javax.swing.JFrame {
         txtMaNhanVien.setText(tbLuong.getValueAt(row,1)+""); 
         Time gio = (Time) tbLuong.getValueAt(row, 2);  
         txtTongGio.setText(gio.toString());
+        
         txtLuongCB.setText(tbLuong.getValueAt(row, 3)+"");
         txtTongLuong.setText(tbLuong.getValueAt(row, 4)+"");
         
     }//GEN-LAST:event_tbLuongMouseClicked
+
+    private void btnTongLuongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTongLuongActionPerformed
+        // TODO add your handling code here:
+        int staff_id = Integer.parseInt(txtMaNhanVien.getText());
+        
+   
+        boolean success = TinhLuongDAO.tinhLuong(staff_id);
+        
+
+        if (success) {
+            JOptionPane.showMessageDialog(this, "Tính lương thành công cho nhân viên có staff_id = " + staff_id);
+        } else {
+            JOptionPane.showMessageDialog(this, "Tính lương không thành công cho nhân viên có staff_id = " + staff_id);
+        }
+    }//GEN-LAST:event_btnTongLuongActionPerformed
 
     /**
      * @param args the command line arguments
@@ -495,7 +570,6 @@ public class TinhLuong extends javax.swing.JFrame {
     private javax.swing.JButton Reset;
     private javax.swing.JButton btnSua;
     private javax.swing.JButton btnThem;
-    private javax.swing.JButton btnTongGio;
     private javax.swing.JButton btnTongLuong;
     private javax.swing.JButton btnXoa;
     private javax.swing.JLabel jLabel10;

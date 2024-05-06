@@ -17,16 +17,27 @@ public class TinhLuongNV
     private double TongLuong;
 
     public TinhLuongNV() {
+        
     }
+
+//    public TinhLuongNV(Time SoGioLam, double TongLuong) {
+//        
+//       this.TongLuong = 0.0;
+//       this.SoGioLam = Time.valueOf("00:00:00");
+//    
+//    }
+//    
+    
+    
 
     public TinhLuongNV(int MaLuong, int staff_id, Time SoGioLam, double LuongCoBan, double TongLuong) {
         this.MaLuong = MaLuong;
         this.staff_id = staff_id;
-        this.SoGioLam = SoGioLam;
+        this.SoGioLam = SoGioLam != null ? SoGioLam : Time.valueOf("00:00:00");
         this.LuongCoBan = LuongCoBan;
         this.TongLuong = TongLuong;
     }
-
+    
     public int getMaLuong() {
         return MaLuong;
     }
