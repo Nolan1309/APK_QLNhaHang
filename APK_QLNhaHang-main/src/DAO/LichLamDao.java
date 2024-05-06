@@ -56,6 +56,46 @@ public class LichLamDao
     return dsLL;
     }
     
+    public static ArrayList<LichLamNV> TimKiemLichLam(Date KiemNgayLam)
+    {
+        ArrayList<LichLamNV> dsLL = new ArrayList<LichLamNV>();
+    try {
+        String sql = String.format("select * from LichLamViec where NgayLam='%tF'", KiemNgayLam);
+        SQLServerDataProvider provider = new SQLServerDataProvider();
+        provider.open();
+        ResultSet rs = provider.executeQuery(sql);
+        while (rs.next()) {
+            LichLamNV ll = new LichLamNV();
+            ll.setMaLichLam(rs.getInt("MaLich"));
+            ll.setMaNV(rs.getInt("staff_id"));
+            ll.setHoTen(rs.getString("ten"));
+            
+            Date ngayLam = rs.getDate("NgayLam");
+            ll.setNgayLam(ngayLam); 
+
+            // Chuyển đổi giá trị từ Time của SQL thành LocalTime
+            Time gioBatDauSQL = rs.getTime("GioBatDau");
+            Time gioKetThucSQL = rs.getTime("GioKetThuc");
+            LocalTime gioBatDau = gioBatDauSQL.toLocalTime();
+            LocalTime gioKetThuc = gioKetThucSQL.toLocalTime();
+
+            // Tạo đối tượng Time mới từ LocalTime
+            Time gioBatDauTime = Time.valueOf(gioBatDau);
+            Time gioKetThucTime = Time.valueOf(gioKetThuc);
+
+            // Đặt giá trị cho thuộc tính GioBatDau và GioKetThuc của đối tượng LichLamNV
+            ll.setGioBatDau(gioBatDauTime);
+            ll.setGioKetThuc(gioKetThucTime);
+   
+            dsLL.add(ll);
+        }
+        provider.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return dsLL;
+    }
+    
     public static boolean ThemLichLam(LichLamNV ll) {
     boolean kq = false;
 

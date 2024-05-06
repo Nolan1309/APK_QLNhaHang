@@ -45,6 +45,37 @@ public class NhanVienDao
         return dsNV;
     }
     
+    public static ArrayList<NhanVien> TimNhanVien(int MaNV)
+    {
+        ArrayList<NhanVien> dsNV = new ArrayList<NhanVien>();
+        try {
+            String sql = String.format("select * from NhanVien where staff_id=%d", MaNV);
+            SQLServerDataProvider provider = new SQLServerDataProvider();
+            provider.open();
+            ResultSet rs = provider.executeQuery(sql);
+            while(rs.next())
+            {
+                NhanVien nv = new NhanVien();
+                nv.setMaNV(rs.getInt("staff_id"));
+                nv.setHoTen(rs.getString("ten"));
+                // Lấy ngày sinh từ ResultSet và chuyển đổi thành kiểu Date
+                Date ngaySinh = rs.getDate("NgaySinh");
+                nv.setNgaySinh(ngaySinh); // Gán ngày sinh cho đối tượng NhanVien
+                nv.setEmail(rs.getString("email"));
+                nv.setSoCanCuoc(rs.getString("so_dien_thoai"));
+                nv.setSDT(rs.getString("socancuoccd"));
+
+                
+                
+                
+                dsNV.add(nv);
+            }
+            provider.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dsNV;
+    }
    
     public static boolean ThemNhanVien(NhanVien nv) {
     boolean kq = false;
@@ -67,7 +98,7 @@ public class NhanVienDao
     
     return kq;
 }
-    
+ 
     public static boolean XoaNhanVien(int MaNV)
     {
         boolean kq = false;

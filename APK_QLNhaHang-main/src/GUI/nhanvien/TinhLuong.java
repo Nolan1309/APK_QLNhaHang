@@ -4,21 +4,18 @@
  */
 package GUI.nhanvien;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 
+import java.awt.Image;
+import javax.swing.JFrame;
+import java.sql.Time;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import POJO.TinhLuongNV;
+import DAO.TinhLuongDAO;
+import java.util.ArrayList;
+import java.util.Vector;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Admin
@@ -28,14 +25,33 @@ public class TinhLuong extends javax.swing.JFrame {
     /**
      * Creates new form TrangChinh
      */
+    DefaultTableModel dtm = new DefaultTableModel();
     public TinhLuong() {
-        initComponents();
-        setTitle("Quản lý nhà hàng");
-        ImageIcon icon = new ImageIcon("");
-        Image img= icon.getImage();
-        setIconImage(img);
+        initComponents();   
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        String []tieuDe ={"Mã lương","Mã nhân viên","Số giờ công","Luong cơ bản", "Tổng lương"};
+        dtm.setColumnIdentifiers(tieuDe);
+        
+        
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+    }
+    
+     private void taiDuLieu( ArrayList<TinhLuongNV> dsTL)
+    {
+        dtm.setRowCount(0);
+        for(TinhLuongNV tl:dsTL)
+        {
+            Vector<Object> vec = new Vector<Object>();
+            vec.add(tl.getMaLuong());
+            vec.add(tl.getStaff_id());
+            vec.add(tl.getSoGioLam());
+            vec.add(tl.getLuongCoBan());
+            vec.add(tl.getTongLuong());
+   
+            dtm.addRow(vec);
+        } 
+        tbLuong.setModel(dtm);
     }
 
   
@@ -55,18 +71,23 @@ public class TinhLuong extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
-        txtMa = new javax.swing.JTextField();
-        txtHoTen = new javax.swing.JTextField();
-        txtTongGio = new javax.swing.JTextField();
+        txtMaLuong = new javax.swing.JTextField();
+        txtMaNhanVien = new javax.swing.JTextField();
+        txtLuongCB = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        txtTongGio = new javax.swing.JTextField();
+        btnTongGio = new javax.swing.JButton();
+        btnTongLuong = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
         txtTongLuong = new javax.swing.JTextField();
         panelLeft_Center = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         btnXoa = new javax.swing.JButton();
         btnThem = new javax.swing.JButton();
         btnSua = new javax.swing.JButton();
+        Reset = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tbLuong = new javax.swing.JTable();
         panelRight = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -76,16 +97,27 @@ public class TinhLuong extends javax.swing.JFrame {
         jLabel3.setText("Quản lí lương");
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel7.setText("Mã nhân viên:");
+        jLabel7.setText("Mã lương:");
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel9.setText("Họ tên nhân viên:");
+        jLabel9.setText("Mã nhân viên:");
 
         jLabel12.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel12.setText("Tổng giờ công:");
+        jLabel12.setText("Lương cơ bản:");
+
+        txtMaLuong.setEnabled(false);
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
-        jLabel8.setText("Tổng lương:");
+        jLabel8.setText("Tổng giờ:");
+
+        btnTongGio.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTongGio.setText("Tổng giờ");
+
+        btnTongLuong.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTongLuong.setText("Tổng lương");
+
+        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
+        jLabel10.setText("Tổng lương:");
 
         javax.swing.GroupLayout panelLeft_TopLayout = new javax.swing.GroupLayout(panelLeft_Top);
         panelLeft_Top.setLayout(panelLeft_TopLayout);
@@ -99,14 +131,24 @@ public class TinhLuong extends javax.swing.JFrame {
                     .addComponent(jLabel12))
                 .addGap(24, 24, 24)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtMa, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
-                    .addComponent(txtHoTen)
-                    .addComponent(txtTongGio))
-                .addGap(29, 29, 29)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                    .addComponent(txtMaLuong, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+                    .addComponent(txtMaNhanVien)
+                    .addComponent(txtLuongCB))
+                .addGap(18, 18, 18)
+                .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelLeft_TopLayout.createSequentialGroup()
+                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel8))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtTongGio, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtTongLuong, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(panelLeft_TopLayout.createSequentialGroup()
+                        .addComponent(btnTongGio, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(37, 37, 37)
+                        .addComponent(btnTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLeft_TopLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -119,61 +161,91 @@ public class TinhLuong extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(txtMa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMaLuong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8)
-                    .addComponent(txtTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTongGio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(txtHoTen, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMaNhanVien, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtTongLuong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
-                    .addComponent(txtTongGio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 11, Short.MAX_VALUE))
+                    .addComponent(txtLuongCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnTongGio)
+                    .addComponent(btnTongLuong))
+                .addGap(0, 9, Short.MAX_VALUE))
         );
 
         btnXoa.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         btnXoa.setText("Xoá");
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
+            }
+        });
 
         btnThem.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         btnThem.setText("Thêm");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
         btnSua.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         btnSua.setText("Sửa");
+        btnSua.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuaActionPerformed(evt);
+            }
+        });
+
+        Reset.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        Reset.setText("Reset");
+        Reset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ResetActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(252, 252, 252)
+                .addGap(156, 156, 156)
                 .addComponent(btnSua)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(79, 79, 79)
+                .addComponent(btnXoa)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(Reset)
+                .addGap(36, 36, 36))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addGap(34, 34, 34)
                     .addComponent(btnThem)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 372, Short.MAX_VALUE)
-                    .addComponent(btnXoa)
-                    .addGap(35, 35, 35)))
+                    .addContainerGap(479, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addComponent(btnSua)
+                .addGap(54, 54, 54)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSua)
+                    .addComponent(btnXoa)
+                    .addComponent(Reset))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addGap(52, 52, 52)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnThem)
-                        .addComponent(btnXoa))
+                    .addComponent(btnThem)
                     .addContainerGap(52, Short.MAX_VALUE)))
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tbLuong.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -184,7 +256,12 @@ public class TinhLuong extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable1);
+        tbLuong.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbLuongMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tbLuong);
 
         javax.swing.GroupLayout panelLeft_CenterLayout = new javax.swing.GroupLayout(panelLeft_Center);
         panelLeft_Center.setLayout(panelLeft_CenterLayout);
@@ -265,6 +342,105 @@ public class TinhLuong extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        // TODO add your handling code here:
+        int manv = Integer.parseInt(txtMaNhanVien.getText());
+
+        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
+        
+
+        // Chuyển đổi chuỗi thành đối tượng LocalTime
+        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      
+        // Chuyển đổi LocalTime thành java.sql.Time
+        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
+        
+        double Lcb = Double.parseDouble(txtLuongCB.getText());
+        double Tl = Double.parseDouble(txtTongLuong.getText());
+        
+        TinhLuongNV tl = new TinhLuongNV();
+        tl.setStaff_id(manv);
+        tl.setSoGioLam(gio);
+        tl.setLuongCoBan(Lcb);
+        tl.setTongLuong(Tl);
+        
+        TinhLuongDAO.ThemLuong(tl);
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+
+        JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
+        // TODO add your handling code here:
+        int maLuong = Integer.parseInt(txtMaLuong.getText());
+        int manv = Integer.parseInt(txtMaNhanVien.getText());
+
+        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
+        
+
+        // Chuyển đổi chuỗi thành đối tượng LocalTime
+        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      
+        // Chuyển đổi LocalTime thành java.sql.Time
+        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
+        
+        double Lcb = Double.parseDouble(txtLuongCB.getText());
+        double Tl = Double.parseDouble(txtTongLuong.getText());
+        
+        TinhLuongNV tl = new TinhLuongNV();
+        tl.setStaff_id(manv);
+        tl.setSoGioLam(gio);
+        tl.setLuongCoBan(Lcb);
+        tl.setTongLuong(Tl);
+        
+         // Khởi tạo đối tượng luong với các giá trị mới
+         TinhLuongNV TL = new TinhLuongNV(maLuong, manv, gio, Lcb, Tl);
+
+        // Gọi phương thức SuaLuong với đối tượng luong đã được thiết lập giá trị
+        
+        TinhLuongDAO.SuaLuong(TL);
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+
+        JOptionPane.showMessageDialog(this, "Sửa lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_btnSuaActionPerformed
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
+        // TODO add your handling code here:
+        int MaLuong = Integer.parseInt(txtMaLuong.getText());
+        
+        TinhLuongNV tl = new TinhLuongNV(MaLuong,-1,null,-1,-1);
+        
+        TinhLuongDAO.XoaLuong(tl.getMaLuong());
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+        
+        JOptionPane.showMessageDialog(this, "Xóa thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_btnXoaActionPerformed
+
+    private void ResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ResetActionPerformed
+        // TODO add your handling code here: 
+        txtMaLuong.setText("");
+        txtMaNhanVien.setText("");
+        txtTongGio.setText("");
+        txtLuongCB.setText("");
+        txtTongLuong.setText("");
+        
+        
+        txtMaNhanVien.requestFocus();
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+    }//GEN-LAST:event_ResetActionPerformed
+
+    private void tbLuongMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbLuongMouseClicked
+        // TODO add your handling code here:
+        int row=tbLuong.getSelectedRow();
+        txtMaLuong.setText(tbLuong.getValueAt(row,0)+"");
+        txtMaNhanVien.setText(tbLuong.getValueAt(row,1)+""); 
+        Time gio = (Time) tbLuong.getValueAt(row, 2);  
+        txtTongGio.setText(gio.toString());
+        txtLuongCB.setText(tbLuong.getValueAt(row, 3)+"");
+        txtTongLuong.setText(tbLuong.getValueAt(row, 4)+"");
+        
+    }//GEN-LAST:event_tbLuongMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -316,9 +492,13 @@ public class TinhLuong extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Reset;
     private javax.swing.JButton btnSua;
     private javax.swing.JButton btnThem;
+    private javax.swing.JButton btnTongGio;
+    private javax.swing.JButton btnTongLuong;
     private javax.swing.JButton btnXoa;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel7;
@@ -326,13 +506,14 @@ public class TinhLuong extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
     private javax.swing.JPanel panelLeft;
     private javax.swing.JPanel panelLeft_Center;
     private javax.swing.JPanel panelLeft_Top;
     private javax.swing.JPanel panelRight;
-    private javax.swing.JTextField txtHoTen;
-    private javax.swing.JTextField txtMa;
+    private javax.swing.JTable tbLuong;
+    private javax.swing.JTextField txtLuongCB;
+    private javax.swing.JTextField txtMaLuong;
+    private javax.swing.JTextField txtMaNhanVien;
     private javax.swing.JTextField txtTongGio;
     private javax.swing.JTextField txtTongLuong;
     // End of variables declaration//GEN-END:variables

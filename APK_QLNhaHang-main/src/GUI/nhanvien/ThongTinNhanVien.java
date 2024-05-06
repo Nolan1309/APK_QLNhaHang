@@ -28,7 +28,7 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
     public ThongTinNhanVien() {
         initComponents();
         this.setLocationRelativeTo(null);
-        String []tieuDe ={"Mã","Họ Tên","Ngày Sinh", "Email","Số căn cước","Số điện thoại"};
+        String []tieuDe ={"Mã","Họ Tên","Ngày Sinh", "Email","Số điện thoại","Số căn cước"};
         dtm.setColumnIdentifiers(tieuDe);
         
         
@@ -86,6 +86,9 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
         btnThem = new javax.swing.JButton();
         btnSua = new javax.swing.JButton();
         btnReset = new javax.swing.JButton();
+        btnTimKiem = new javax.swing.JButton();
+        jLabel21 = new javax.swing.JLabel();
+        txtMaTimKiem = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tbDSNV = new javax.swing.JTable();
         panelRight = new javax.swing.JPanel();
@@ -141,11 +144,7 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
                             .addComponent(txtTen)
                             .addComponent(txtEmail))
                         .addGap(29, 29, 29)
-                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(panelLeft_TopLayout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtSoDienThoai, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelLeft_TopLayout.createSequentialGroup()
                                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel18)
@@ -153,11 +152,15 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jDateNgaySinh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(txtSoCanCuoc)))))
+                                    .addComponent(txtSoCanCuoc)))
+                            .addGroup(panelLeft_TopLayout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtSoDienThoai, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(panelLeft_TopLayout.createSequentialGroup()
                         .addGap(202, 202, 202)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         panelLeft_TopLayout.setVerticalGroup(
             panelLeft_TopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -217,20 +220,41 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
             }
         });
 
+        btnTimKiem.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        btnTimKiem.setText("Tìm kiếm");
+        btnTimKiem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTimKiemActionPerformed(evt);
+            }
+        });
+
+        jLabel21.setFont(new java.awt.Font("Times New Roman", 1, 13)); // NOI18N
+        jLabel21.setText("Nhập mã nhân viên:");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnThem)
-                .addGap(57, 57, 57)
-                .addComponent(btnSua)
-                .addGap(75, 75, 75)
-                .addComponent(btnXoa)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
-                .addComponent(btnReset)
-                .addGap(76, 76, 76))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel21)
+                    .addComponent(btnThem))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(97, 97, 97)
+                        .addComponent(btnSua)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnXoa)
+                        .addGap(74, 74, 74)
+                        .addComponent(btnReset)
+                        .addGap(14, 14, 14))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtMaTimKiem)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnTimKiem)
+                        .addGap(45, 45, 45))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -241,7 +265,12 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
                     .addComponent(btnThem)
                     .addComponent(btnXoa)
                     .addComponent(btnReset))
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnTimKiem)
+                    .addComponent(jLabel21)
+                    .addComponent(txtMaTimKiem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         tbDSNV.setModel(new javax.swing.table.DefaultTableModel(
@@ -273,7 +302,7 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
             .addGroup(panelLeft_CenterLayout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 560, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
         panelLeft_CenterLayout.setVerticalGroup(
             panelLeft_CenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -430,9 +459,25 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
         txtEmail.setText("");
         txtSoDienThoai.setText("");
         txtSoCanCuoc.setText(""); 
+        txtMaTimKiem.setText("");   
         
         txtTen.requestFocus();
+        taiDuLieu(new NhanVienDao().HienThiDanhSachNhanVien());
     }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnTimKiemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimKiemActionPerformed
+        // TODO add your handling code here:
+        int MaNV = Integer.parseInt(txtMaTimKiem.getText());
+        
+        NhanVien nv = new NhanVien(MaNV,"",null,"","","");
+        
+        //NhanVienDao.TimNhanVien(nv.getMaNV());
+        
+        taiDuLieu(new NhanVienDao().TimNhanVien(nv.getMaNV()));
+        
+        JOptionPane.showMessageDialog(this, "Tìm thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        
+    }//GEN-LAST:event_btnTimKiemActionPerformed
 
     
     /**
@@ -481,11 +526,13 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnSua;
     private javax.swing.JButton btnThem;
+    private javax.swing.JButton btnTimKiem;
     private javax.swing.JButton btnXoa;
     private com.toedter.calendar.JDateChooser jDateNgaySinh;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -499,6 +546,7 @@ public class ThongTinNhanVien extends javax.swing.JFrame {
     private javax.swing.JTable tbDSNV;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtMa;
+    private javax.swing.JTextField txtMaTimKiem;
     private javax.swing.JTextField txtSoCanCuoc;
     private javax.swing.JTextField txtSoDienThoai;
     private javax.swing.JTextField txtTen;
