@@ -5,18 +5,15 @@
 package GUI.nhanvien;
 
 
-import java.awt.Image;
+
 import javax.swing.JFrame;
-import java.sql.Time;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import POJO.TinhLuongNV;
 import DAO.TinhLuongDAO;
 import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import java.time.format.DateTimeParseException;
+
 /**
  *
  * @author Admin
@@ -31,7 +28,7 @@ public class TinhLuong extends javax.swing.JFrame {
         initComponents();   
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        String []tieuDe ={"Mã lương","Mã nhân viên","Số giờ công","Luong cơ bản", "Tổng lương"};
+        String []tieuDe ={"Mã lương","Mã nhân viên","Tổng giờ công","Lương cơ bản", "Tổng lương"};
         dtm.setColumnIdentifiers(tieuDe);
         
         
@@ -343,82 +340,55 @@ public class TinhLuong extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
-        // TODO add your handling code here:
-//        int manv = Integer.parseInt(txtMaNhanVien.getText());
-//
-//        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
-//        
-//        // Kiểm tra xem chuỗi có rỗng không
-//        if (gioStr.isEmpty()) {
-//        gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
-//
-//        // Chuyển đổi chuỗi thành đối tượng LocalTime
-//        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
-//      
-//        // Chuyển đổi LocalTime thành java.sql.Time
-//        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
-//        
-//        double Lcb = Double.parseDouble(txtLuongCB.getText());
-//        double Tl = Double.parseDouble(txtTongLuong.getText());
-//        
-//        TinhLuongNV tl = new TinhLuongNV();
-//        tl.setStaff_id(manv);
-//        tl.setSoGioLam(gio);
-//        tl.setLuongCoBan(Lcb);
-//        tl.setTongLuong(Tl);
-//        
-//        TinhLuongDAO.ThemLuong(tl);
-//        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
-//
-//        JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        // TODO add your handling code here:         
+        int manv;
+        double Lcb;
+        double gio;
+        double Luong;
+        // Kiểm tra và chuyển đổi dữ liệu đầu vào cho mã nhân viên bằng cách sử dụng try-catch
+        try {
+            manv = Integer.parseInt(txtMaNhanVien.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số nguyên cho mã nhân viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
         
-            int manv = Integer.parseInt(txtMaNhanVien.getText());
+         // Kiểm tra và chuyển đổi dữ liệu đầu vào cho tổng số giờ bằng cách sử dụng try-catch
+        try {
+            gio = Double.parseDouble(txtTongGio.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập tổng số giờ", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
 
-           String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
+        // Kiểm tra và chuyển đổi dữ liệu đầu vào cho lương cơ bản bằng cách sử dụng try-catch
+        try {
+            Lcb = Double.parseDouble(txtLuongCB.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số thực cho lương cơ bản", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
 
-            // Kiểm tra xem chuỗi có rỗng không
-            if (gioStr.isEmpty()) {
-                gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
-}
+        // Kiểm tra và chuyển đổi dữ liệu đầu vào cho tổng lương bằng cách sử dụng try-catch
+        try {
+            Luong = Double.parseDouble(txtTongLuong.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số lương", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
 
-            // Chuyển đổi chuỗi thành đối tượng LocalTime
-            LocalTime gioLocal;
-            try {
-                gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
-            } catch (DateTimeParseException e) {
-                // Xử lý ngoại lệ khi chuỗi không đúng định dạng
-                // Ví dụ: thông báo cho người dùng nhập lại giờ đúng định dạng
-                JOptionPane.showMessageDialog(this, "Định dạng giờ không hợp lệ. Vui lòng nhập lại theo định dạng HH:mm:ss", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return; // Dừng thực hiện phương thức nếu có lỗi
-            }
+        // Tạo đối tượng TinhLuongNV và thêm vào cơ sở dữ liệu
+        TinhLuongNV tl = new TinhLuongNV();
+        tl.setStaff_id(manv);
+        tl.setSoGioLam(gio);
+        tl.setLuongCoBan(Lcb);      
+        tl.setTongLuong(Luong);
 
-            // Chuyển đổi LocalTime thành java.sql.Time
-            java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
-
-            
-            double Lcb = Double.parseDouble(txtLuongCB.getText());
-            //double Tl = Double.parseDouble(txtTongLuong.getText());
-            double Tl;
-            String luongStr = txtTongLuong.getText();
-            if (!luongStr.isEmpty()) {
-                Tl = Double.parseDouble(luongStr);
-            } else {
-                Tl = 1.0; // hoặc bất kỳ giá trị mặc định nào phù hợp
-            }
-            
-            
-
-            TinhLuongNV tl = new TinhLuongNV();
-            tl.setStaff_id(manv);
-            tl.setSoGioLam(gio);
-            tl.setLuongCoBan(Lcb);
-            tl.setTongLuong(Tl);
-
-            TinhLuongDAO.ThemLuong(tl);
-            taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
-
-            JOptionPane.showMessageDialog(this, "Thêm lương thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         
+        TinhLuongDAO.ThemLuong(tl);
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+        JOptionPane.showMessageDialog(this, "Thêm lương cho nhân viên thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+           
     }//GEN-LAST:event_btnThemActionPerformed
 
     
@@ -427,22 +397,7 @@ public class TinhLuong extends javax.swing.JFrame {
         // TODO add your handling code here:
         int maLuong = Integer.parseInt(txtMaLuong.getText());
         int manv = Integer.parseInt(txtMaNhanVien.getText());
-
-//        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
-        String gioStr = txtTongGio.getText(); // Giờ bắt đầu dưới dạng chuỗi
-
-        // Kiểm tra xem chuỗi có rỗng không
-        if (gioStr.isEmpty()) {
-            gioStr = "00:00:00"; // Gán giá trị mặc định là "00:00:00"
-        }
-
-
-        // Chuyển đổi chuỗi thành đối tượng LocalTime
-        LocalTime gioLocal = LocalTime.parse(gioStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
-      
-        // Chuyển đổi LocalTime thành java.sql.Time
-        java.sql.Time gio= java.sql.Time.valueOf(gioLocal);
-        
+        double gio = Double.parseDouble(txtTongGio.getText());
         double Lcb = Double.parseDouble(txtLuongCB.getText());
         double Tl = Double.parseDouble(txtTongLuong.getText());
         
@@ -467,7 +422,7 @@ public class TinhLuong extends javax.swing.JFrame {
         // TODO add your handling code here:
         int MaLuong = Integer.parseInt(txtMaLuong.getText());
         
-        TinhLuongNV tl = new TinhLuongNV(MaLuong,-1,null,-1,-1);
+        TinhLuongNV tl = new TinhLuongNV(MaLuong,-1,-1,-1,-1);
         
         TinhLuongDAO.XoaLuong(tl.getMaLuong());
         taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
@@ -492,10 +447,8 @@ public class TinhLuong extends javax.swing.JFrame {
         // TODO add your handling code here:
         int row=tbLuong.getSelectedRow();
         txtMaLuong.setText(tbLuong.getValueAt(row,0)+"");
-        txtMaNhanVien.setText(tbLuong.getValueAt(row,1)+""); 
-        Time gio = (Time) tbLuong.getValueAt(row, 2);  
-        txtTongGio.setText(gio.toString());
-        
+        txtMaNhanVien.setText(tbLuong.getValueAt(row,1)+"");  
+        txtTongGio.setText(tbLuong.getValueAt(row, 2)+"");
         txtLuongCB.setText(tbLuong.getValueAt(row, 3)+"");
         txtTongLuong.setText(tbLuong.getValueAt(row, 4)+"");
         
@@ -504,16 +457,18 @@ public class TinhLuong extends javax.swing.JFrame {
     private void btnTongLuongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTongLuongActionPerformed
         // TODO add your handling code here:
         int staff_id = Integer.parseInt(txtMaNhanVien.getText());
-        
-   
+    
         boolean success = TinhLuongDAO.tinhLuong(staff_id);
         
-
         if (success) {
-            JOptionPane.showMessageDialog(this, "Tính lương thành công cho nhân viên có staff_id = " + staff_id);
+            JOptionPane.showMessageDialog(this, "Tính lương thành công cho nhân viên có mã là: = " + staff_id);
+            
         } else {
-            JOptionPane.showMessageDialog(this, "Tính lương không thành công cho nhân viên có staff_id = " + staff_id);
+            JOptionPane.showMessageDialog(this, "Tính lương không thành công cho nhân viên có mã là: = " + staff_id);
         }
+        
+        taiDuLieu(new TinhLuongDAO().HienThiDanhSachLuong());
+        
     }//GEN-LAST:event_btnTongLuongActionPerformed
 
     /**

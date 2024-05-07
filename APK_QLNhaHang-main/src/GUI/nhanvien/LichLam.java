@@ -7,8 +7,6 @@ package GUI.nhanvien;
 
 
 import DAO.LichLamDao; 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
@@ -18,6 +16,8 @@ import POJO.LichLamNV;
 import java.sql.Time;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import javax.swing.JFrame;
 
 /**
  *
@@ -32,6 +32,7 @@ public class LichLam extends javax.swing.JFrame {
     public LichLam() {
         initComponents();
         this.setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         String []tieuDe ={"Mã lịch làm","Mã nhân viên","Họ tên","Ngày làm", "Giờ bắt đầu","Giờ kết thúc"};
         dtm.setColumnIdentifiers(tieuDe);
         
@@ -384,15 +385,48 @@ public class LichLam extends javax.swing.JFrame {
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
         // TODO add your handling code here:
-        int manv = Integer.parseInt(txtMaNhanVien.getText());
+        int manv;
+
+        try {
+            manv = Integer.parseInt(txtMaNhanVien.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số nguyên cho mã nhân viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
+
+        // Tiếp tục sử dụng biến manv ở đây sau khi đã gán giá trị thành công
+
+
         String tenNV = txtHoTen.getText();
-        Date ngayLam = JDateNgayLam.getDate();
+        if (tenNV.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập tên nhân viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return; // Dừng thực hiện phương thức nếu có lỗi
+        }
+        
+        Date ngayLam = JDateNgayLam.getDate();  
+        if (ngayLam == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày làm", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
+
         String gioBatDauStr = txtGioBatDau.getText(); // Giờ bắt đầu dưới dạng chuỗi
         String gioKetThucStr = txtGioKetThuc.getText(); // Giờ kết thúc dưới dạng chuỗi
 
-        // Chuyển đổi chuỗi thành đối tượng LocalTime
-        LocalTime gioBatDauLocal = LocalTime.parse(gioBatDauStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
-        LocalTime gioKetThucLocal = LocalTime.parse(gioKetThucStr, DateTimeFormatter.ofPattern("HH:mm:ss")); 
+        // Kiểm tra xem chuỗi có rỗng không
+        if (gioBatDauStr.isEmpty() || gioKetThucStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập giờ bắt đầu và giờ kết thúc", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
+
+        LocalTime gioBatDauLocal, gioKetThucLocal;
+        try {
+            gioBatDauLocal = LocalTime.parse(gioBatDauStr, DateTimeFormatter.ofPattern("HH:mm:ss")); // Chuyển chuỗi thành kiểu LocalTime
+            gioKetThucLocal = LocalTime.parse(gioKetThucStr, DateTimeFormatter.ofPattern("HH:mm:ss")); // Chuyển chuỗi thành kiểu LocalTime
+        } catch (DateTimeParseException e) {
+            // Xử lý ngoại lệ khi chuỗi không đúng định dạng
+            JOptionPane.showMessageDialog(this, "Định dạng giờ không hợp lệ. Vui lòng nhập lại theo định dạng HH:mm:ss", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
 
         // Chuyển đổi LocalTime thành java.sql.Time
         java.sql.Time gioBatDau = java.sql.Time.valueOf(gioBatDauLocal);
@@ -441,15 +475,23 @@ public class LichLam extends javax.swing.JFrame {
 
     private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
         // TODO add your handling code here:
-        int MaL = Integer.parseInt(txtMaLich.getText());
-        
-        LichLamNV ll = new LichLamNV(MaL,-1,"",null,null,null);
-        
-        LichLamDao.XoaLichLam(ll.getMaLichLam());
-        taiDuLieu(new LichLamDao().HienThiDanhSachLichLam());
-        
-        JOptionPane.showMessageDialog(this, "Xóa thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-        
+        // Lấy mã lịch từ trường văn bản
+        int maLich = Integer.parseInt(txtMaLich.getText());
+        // Tạo hộp thoại xác nhận
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+
+        // Kiểm tra xem người dùng đã xác nhận xóa chưa
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Nếu người dùng xác nhận xóa, tiến hành xóa lịch làm
+            LichLamNV ll = new LichLamNV(maLich, -1, "", null, null, null);
+            LichLamDao.XoaLichLam(ll.getMaLichLam());
+
+            // Cập nhật dữ liệu hiển thị
+            taiDuLieu(new LichLamDao().HienThiDanhSachLichLam());
+
+            // Thông báo xóa thành công
+            JOptionPane.showMessageDialog(this, "Xóa thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        } 
     }//GEN-LAST:event_btnXoaActionPerformed
 
     private void tbLichLamMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbLichLamMouseClicked
@@ -493,15 +535,20 @@ public class LichLam extends javax.swing.JFrame {
 
     private void btnTimKiemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimKiemActionPerformed
         // TODO add your handling code here:
-        Date ngayLam = jDateNgayLamKiem.getDate();
         
+        Date ngayLam = JDateNgayLam.getDate();  
+        if (ngayLam == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày làm", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng thực hiện phương thức nếu có lỗi
+        }
+        else 
+        {
         LichLamNV ll = new LichLamNV(-1,-1,"",ngayLam,null,null);
        
-        
         taiDuLieu(new LichLamDao().TimKiemLichLam(ll.getNgayLam()));
         
-        
         JOptionPane.showMessageDialog(this, "Tìm thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
 
     }//GEN-LAST:event_btnTimKiemActionPerformed
 

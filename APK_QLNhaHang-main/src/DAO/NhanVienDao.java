@@ -24,18 +24,16 @@ public class NhanVienDao
             while(rs.next())
             {
                 NhanVien nv = new NhanVien();
+                
                 nv.setMaNV(rs.getInt("staff_id"));
                 nv.setHoTen(rs.getString("ten"));
                 // Lấy ngày sinh từ ResultSet và chuyển đổi thành kiểu Date
                 Date ngaySinh = rs.getDate("NgaySinh");
                 nv.setNgaySinh(ngaySinh); // Gán ngày sinh cho đối tượng NhanVien
                 nv.setEmail(rs.getString("email"));
-                nv.setSoCanCuoc(rs.getString("so_dien_thoai"));
-                nv.setSDT(rs.getString("socancuoccd"));
+                nv.setSoCanCuoc(rs.getString("socancuoccd"));
+                nv.setSDT(rs.getString("so_dien_thoai"));
 
-                
-                
-                
                 dsNV.add(nv);
             }
             provider.close();
@@ -62,12 +60,9 @@ public class NhanVienDao
                 Date ngaySinh = rs.getDate("NgaySinh");
                 nv.setNgaySinh(ngaySinh); // Gán ngày sinh cho đối tượng NhanVien
                 nv.setEmail(rs.getString("email"));
-                nv.setSoCanCuoc(rs.getString("so_dien_thoai"));
-                nv.setSDT(rs.getString("socancuoccd"));
-
-                
-                
-                
+                nv.setSoCanCuoc(rs.getString("socancuoccd"));
+                nv.setSDT(rs.getString("so_dien_thoai"));
+                       
                 dsNV.add(nv);
             }
             provider.close();
@@ -80,6 +75,7 @@ public class NhanVienDao
     public static boolean ThemNhanVien(NhanVien nv) {
     boolean kq = false;
     String sql = String.format("INSERT INTO NhanVien(ten, NgaySinh, email, socancuoccd, so_dien_thoai) VALUES ('%s', '%tF', '%s', '%s', '%s')", nv.getHoTen(), nv.getNgaySinh(), nv.getEmail(), nv.getSoCanCuoc(), nv.getSDT());
+
     SQLServerDataProvider provider = new SQLServerDataProvider();
     
     try {
@@ -139,33 +135,5 @@ public class NhanVienDao
          return kq;
     }
     
-    public static NhanVien LayNhanVien(int MaNV)
-    {
-        NhanVien nv = null;
-        try {
-            String sql ="select * from phongban where staff_id =" +MaNV;
-            SQLServerDataProvider provider = new SQLServerDataProvider();
-            provider.open();
-            ResultSet rs = provider.executeQuery(sql);
-            if(rs.next())
-            {
-                nv = new NhanVien();
-                nv.setMaNV(rs.getInt("MaNV"));
-                nv.setHoTen(rs.getString("HoTen"));
-                nv.setEmail(rs.getString("Email"));
-                nv.setSoCanCuoc(rs.getString("SoCanCuoc"));
-                nv.setSDT(rs.getString("SDT"));
-                
-                
-            }
-            provider.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return nv;
-    }
-    
    
-    
-    
 }

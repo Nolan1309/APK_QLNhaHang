@@ -20,7 +20,6 @@ public class NhanVien {
     private String SDT;
 
     public NhanVien() {
-        
     }
 
     public NhanVien(int MaNV, String HoTen, Date NgaySinh, String Email, String SoCanCuoc, String SDT) {
@@ -79,6 +78,8 @@ public class NhanVien {
     public void setSDT(String SDT) {
         this.SDT = SDT;
     }
+
+    
     
     
     

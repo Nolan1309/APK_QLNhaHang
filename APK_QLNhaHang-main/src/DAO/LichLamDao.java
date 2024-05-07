@@ -19,42 +19,43 @@ public class LichLamDao
     public static ArrayList<LichLamNV> HienThiDanhSachLichLam()
     {
         ArrayList<LichLamNV> dsLL = new ArrayList<LichLamNV>();
-    try {
-        String sql = "SELECT * FROM LichLamViec";
-        SQLServerDataProvider provider = new SQLServerDataProvider();
-        provider.open();
-        ResultSet rs = provider.executeQuery(sql);
-        while (rs.next()) {
-            LichLamNV ll = new LichLamNV();
-            ll.setMaLichLam(rs.getInt("MaLich"));
-            ll.setMaNV(rs.getInt("staff_id"));
-            ll.setHoTen(rs.getString("ten"));
-            
-            Date ngayLam = rs.getDate("NgayLam");
-            ll.setNgayLam(ngayLam); 
+        try {
+            String sql = "SELECT * FROM LichLamViec";
+            SQLServerDataProvider provider = new SQLServerDataProvider();
+            provider.open();
+            ResultSet rs = provider.executeQuery(sql);
+            while (rs.next()) {
+                LichLamNV ll = new LichLamNV();
 
-            // Chuyển đổi giá trị từ Time của SQL thành LocalTime
-            Time gioBatDauSQL = rs.getTime("GioBatDau");
-            Time gioKetThucSQL = rs.getTime("GioKetThuc");
-            LocalTime gioBatDau = gioBatDauSQL.toLocalTime();
-            LocalTime gioKetThuc = gioKetThucSQL.toLocalTime();
+                ll.setMaLichLam(rs.getInt("MaLich"));
+                ll.setMaNV(rs.getInt("staff_id"));
+                ll.setHoTen(rs.getString("ten"));
 
-            // Tạo đối tượng Time mới từ LocalTime
-            Time gioBatDauTime = Time.valueOf(gioBatDau);
-            Time gioKetThucTime = Time.valueOf(gioKetThuc);
+                Date ngayLam = rs.getDate("NgayLam");
+                ll.setNgayLam(ngayLam); 
 
-            // Đặt giá trị cho thuộc tính GioBatDau và GioKetThuc của đối tượng LichLamNV
-            ll.setGioBatDau(gioBatDauTime);
-            ll.setGioKetThuc(gioKetThucTime);
-   
-            dsLL.add(ll);
+                // Chuyển đổi giá trị từ Time của SQL thành LocalTime
+                Time gioBatDauSQL = rs.getTime("GioBatDau");
+                Time gioKetThucSQL = rs.getTime("GioKetThuc");
+                LocalTime gioBatDau = gioBatDauSQL.toLocalTime();
+                LocalTime gioKetThuc = gioKetThucSQL.toLocalTime();
+
+                // Tạo đối tượng Time mới từ LocalTime
+                Time gioBatDauTime = Time.valueOf(gioBatDau);
+                Time gioKetThucTime = Time.valueOf(gioKetThuc);
+
+                // Đặt giá trị cho thuộc tính GioBatDau và GioKetThuc của đối tượng LichLamNV
+                ll.setGioBatDau(gioBatDauTime);
+                ll.setGioKetThuc(gioKetThucTime);
+
+                dsLL.add(ll);
+            }
+            provider.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        provider.close();
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return dsLL;
-    }
+        return dsLL;
+        }
     
     public static ArrayList<LichLamNV> TimKiemLichLam(Date KiemNgayLam)
     {
@@ -97,33 +98,33 @@ public class LichLamDao
     }
     
     public static boolean ThemLichLam(LichLamNV ll) {
-    boolean kq = false;
+        boolean kq = false;
 
-    Time gioBatDau = ll.getGioBatDau();
-    String gioBatDauFormatted = gioBatDau.toString(); // Chuyển thời gian thành chuỗi
+        Time gioBatDau = ll.getGioBatDau();
+        String gioBatDauFormatted = gioBatDau.toString(); // Chuyển thời gian thành chuỗi
 
-    Time gioKetThuc = ll.getGioKetThuc();
-    String gioKetThucFormatted = gioKetThuc.toString(); // Chuyển thời gian thành chuỗi
+        Time gioKetThuc = ll.getGioKetThuc();
+        String gioKetThucFormatted = gioKetThuc.toString(); // Chuyển thời gian thành chuỗi
 
-    String sql = String.format("INSERT INTO LichLamViec(staff_id, ten, NgayLam, GioBatDau, GioKetThuc) VALUES (%d, '%s', '%tF', '%s', '%s')",
-            ll.getMaNV(), ll.getHoTen(), ll.getNgayLam(), gioBatDauFormatted, gioKetThucFormatted);
-    SQLServerDataProvider provider = new SQLServerDataProvider();
-    
-    try {
-        provider.open();
-        
-        int n = provider.executeUpdate(sql);
-        
-        if (n == 1) {
-            kq = true;
+        String sql = String.format("INSERT INTO LichLamViec(staff_id, ten, NgayLam, GioBatDau, GioKetThuc) VALUES (%d, '%s', '%tF', '%s', '%s')",
+                ll.getMaNV(), ll.getHoTen(), ll.getNgayLam(), gioBatDauFormatted, gioKetThucFormatted);
+        SQLServerDataProvider provider = new SQLServerDataProvider();
+
+        try {
+            provider.open();
+
+            int n = provider.executeUpdate(sql);
+
+            if (n == 1) {
+                kq = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            provider.close();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    } finally {
-        provider.close();
-    }
-    
-    return kq;
+
+        return kq;
 }
     
     public static boolean XoaLichLam(int MaLich)
