@@ -12,14 +12,14 @@ public class TinhLuongNV
 { 
     private int MaLuong;
     private int staff_id;
-    private double SoGioLam;
-    private double LuongCoBan;
-    private double TongLuong;
+    private int SoGioLam;
+    private int LuongCoBan;
+    private int TongLuong;
 
     public TinhLuongNV() {
     }
 
-    public TinhLuongNV(int MaLuong, int staff_id, double SoGioLam, double LuongCoBan, double TongLuong) {
+    public TinhLuongNV(int MaLuong, int staff_id, int SoGioLam, int LuongCoBan, int TongLuong) {
         this.MaLuong = MaLuong;
         this.staff_id = staff_id;
         this.SoGioLam = SoGioLam;
@@ -43,31 +43,30 @@ public class TinhLuongNV
         this.staff_id = staff_id;
     }
 
-    public double getSoGioLam() {
+    public int getSoGioLam() {
         return SoGioLam;
     }
 
-    public void setSoGioLam(double SoGioLam) {
+    public void setSoGioLam(int SoGioLam) {
         this.SoGioLam = SoGioLam;
     }
 
-    public double getLuongCoBan() {
+    public int getLuongCoBan() {
         return LuongCoBan;
     }
 
-    public void setLuongCoBan(double LuongCoBan) {
+    public void setLuongCoBan(int LuongCoBan) {
         this.LuongCoBan = LuongCoBan;
     }
 
-    public double getTongLuong() {
+    public int getTongLuong() {
         return TongLuong;
     }
 
-    public void setTongLuong(double TongLuong) {
+    public void setTongLuong(int TongLuong) {
         this.TongLuong = TongLuong;
     }
     
     
-
-    
+   
 }

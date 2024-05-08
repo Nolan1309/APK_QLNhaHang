@@ -5,11 +5,8 @@
 package DAO;
 import POJO.TinhLuongNV;
 import java.sql.ResultSet;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.sql.Time;
-import java.time.format.DateTimeFormatter;
+
 /**
  *
  * @author Gia Bao
@@ -30,9 +27,9 @@ public class TinhLuongDAO
                 
                 tl.setMaLuong(rs.getInt("MaLuong"));
                 tl.setStaff_id(rs.getInt("staff_id"));
-                tl.setSoGioLam(rs.getDouble("SoGioLam"));         
-                tl.setLuongCoBan(rs.getDouble("LuongCoBan"));
-                tl.setTongLuong(rs.getDouble("TongLuong"));
+                tl.setSoGioLam(rs.getInt("SoGioLam"));         
+                tl.setLuongCoBan(rs.getInt("LuongCoBan"));
+                tl.setTongLuong(rs.getInt("TongLuong"));
 
                 dsTL.add(tl);
             }
@@ -47,7 +44,7 @@ public class TinhLuongDAO
     public static boolean ThemLuong(TinhLuongNV tl)
     {
         boolean kq = false;
-        String sql = String.format("insert into TinhLuong(staff_id, SoGioLam, LuongCoBan, TongLuong) values (%d, %f, %f, %f)", tl.getStaff_id(),tl.getSoGioLam(), tl.getLuongCoBan(), tl.getTongLuong());
+        String sql = String.format("insert into TinhLuong(staff_id, SoGioLam, LuongCoBan, TongLuong) values (%d, %d, %d, %d)", tl.getStaff_id(),tl.getSoGioLam(), tl.getLuongCoBan(), tl.getTongLuong());
         SQLServerDataProvider provider = new SQLServerDataProvider();
         try {
             provider.open();
@@ -86,7 +83,7 @@ public class TinhLuongDAO
 
     
         String sql = String.format("UPDATE TinhLuong "
-                            + "SET staff_id = '%s', SoGioLam = %f, LuongCoBan = %f, TongLuong = %f "
+                            + "SET staff_id = '%s', SoGioLam = %d, LuongCoBan = %d, TongLuong = %d "
                             + "WHERE MaLuong = %d", tl.getStaff_id(), tl.getSoGioLam(), tl.getLuongCoBan(), tl.getTongLuong(), tl.getMaLuong());
 
         SQLServerDataProvider provider = new SQLServerDataProvider();

@@ -342,9 +342,9 @@ public class TinhLuong extends javax.swing.JFrame {
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
         // TODO add your handling code here:         
         int manv;
-        double Lcb;
-        double gio;
-        double Luong;
+        int Lcb;
+        int gio;
+        int Luong;
         // Kiểm tra và chuyển đổi dữ liệu đầu vào cho mã nhân viên bằng cách sử dụng try-catch
         try {
             manv = Integer.parseInt(txtMaNhanVien.getText());
@@ -355,7 +355,7 @@ public class TinhLuong extends javax.swing.JFrame {
         
          // Kiểm tra và chuyển đổi dữ liệu đầu vào cho tổng số giờ bằng cách sử dụng try-catch
         try {
-            gio = Double.parseDouble(txtTongGio.getText());
+            gio = Integer.parseInt(txtTongGio.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tổng số giờ", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return; // Dừng thực hiện phương thức nếu có lỗi
@@ -363,7 +363,7 @@ public class TinhLuong extends javax.swing.JFrame {
 
         // Kiểm tra và chuyển đổi dữ liệu đầu vào cho lương cơ bản bằng cách sử dụng try-catch
         try {
-            Lcb = Double.parseDouble(txtLuongCB.getText());
+            Lcb = Integer.parseInt(txtLuongCB.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập số thực cho lương cơ bản", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return; // Dừng thực hiện phương thức nếu có lỗi
@@ -371,7 +371,7 @@ public class TinhLuong extends javax.swing.JFrame {
 
         // Kiểm tra và chuyển đổi dữ liệu đầu vào cho tổng lương bằng cách sử dụng try-catch
         try {
-            Luong = Double.parseDouble(txtTongLuong.getText());
+            Luong = Integer.parseInt(txtTongLuong.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập số lương", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return; // Dừng thực hiện phương thức nếu có lỗi
@@ -397,9 +397,9 @@ public class TinhLuong extends javax.swing.JFrame {
         // TODO add your handling code here:
         int maLuong = Integer.parseInt(txtMaLuong.getText());
         int manv = Integer.parseInt(txtMaNhanVien.getText());
-        double gio = Double.parseDouble(txtTongGio.getText());
-        double Lcb = Double.parseDouble(txtLuongCB.getText());
-        double Tl = Double.parseDouble(txtTongLuong.getText());
+        int gio = Integer.parseInt(txtTongGio.getText());
+        int Lcb = Integer.parseInt(txtLuongCB.getText());
+        int Tl = Integer.parseInt(txtTongLuong.getText());
         
         TinhLuongNV tl = new TinhLuongNV();
         tl.setStaff_id(manv);
