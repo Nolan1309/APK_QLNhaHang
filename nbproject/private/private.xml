@@ -3,8 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/DAO/Connect.java</file>
-            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/DAO/Order_XuLy.java</file>
+            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/GUI/thanhtoan/model/ReportManager.java</file>
+            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/GUI/thanhtoan/model/Parameter_ThanhToan.java</file>
+            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/GUI/thanhtoan/HoaDonThanhToan.jrxml</file>
+            <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/GUI/thanhtoan/model/ItemMonAn_report.java</file>
             <file>file:/F:/Code/Java/BaoCao/Main/APK_QLNhaHang-main/src/GUI/TrangChinh.java</file>
         </group>
     </open-files>
